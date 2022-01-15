@@ -1,0 +1,36 @@
+# TODO
+#
+# - Get more logs?
+# - ...
+
+{
+	debug
+	http_port 80
+	https_port 443
+	log {
+		format console
+	}
+    local_certs
+}
+
+# https://{$ROUTE}:{$PORT}
+https://*:{$PORT}
+route {
+
+	forward_proxy {
+		# basic_auth user pass
+		acl {
+			allow *.google.com
+			deny all
+		}
+		ports 80 443 22
+		# dial_timeout 30
+		# upstream         https://user:password@extra-upstream-hop.com
+		# hide_ip
+		# hide_via
+		# probe_resistance secret-link-kWWL9Q.com # alternatively you can use a real domain, such as caddyserver.com
+		serve_pac
+	}
+
+	file_server
+}
