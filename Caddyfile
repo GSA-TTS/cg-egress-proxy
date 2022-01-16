@@ -33,8 +33,7 @@ route {
 
 			# TODO: Also get a whole allow/deny list from an env var
 			# ${ALLOWHOSTS}
-
-			allow test-python-flask.app.cloud.gov
+            allow_file acl.txt
 			deny all
 		}
 
