@@ -56,3 +56,5 @@ route {
     # There is no evidence for that, really, but it appears in the example for forwardproxy.
 	file_server
 }
+
+tls cert.pem key.pem
