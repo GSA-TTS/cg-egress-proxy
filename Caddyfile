@@ -8,15 +8,19 @@
 # - Present forward_proxy for https://*:443, used for development
 #   - Have to work out SmallStep: https://github.com/caddyserver/caddy/issues/3021
 #   - If it has to be another block: use Caddyfile templating to make them identical!
+
 {
-	log {
+	debug
+    log {
 		format console
+        level DEBUG
 	}
+    # auto_https disable_redirects
 }
 
 # Do NOT remove :443 from the start of this line. It's necessary for the
 # forward_proxy directive to operate
-:443, localhost
+:443, localhost:8080
 route {
 	forward_proxy {
 		# TODO: Make configurable
@@ -45,6 +49,10 @@ route {
 		#   ports {$ALLOWPORTS}
 
 		ports 80 443
+        serve_pac
 	}
+
+    # We think this may be needed in order for serve_pac to the /proxy.pac.
+    # There is no evidence for that, really, but it appears in the example for forwardproxy.
 	file_server
 }
