@@ -12,8 +12,12 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     environment:
-      - PORT=443
-      - ROUTE=egress-proxy.app.internal
+      - PORT=8080
+      - USER=user
+      - PASS=pass
+      # - ALLOWPORT=22
+      # - ALLOWPORTS="80 443"
+      # - ALLOWHOST="cnn.com"
 
 volumes:
   caddy_data:

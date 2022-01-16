@@ -1,36 +1,50 @@
 # TODO
-#
-# - Get more logs?
-# - ...
-
+# - curl is working, why not Firefox?!
+# - Figure out how to expand an env var that contains spaces, *, newline, etc.
+# - Add test Dockerfile/directory to compose!
+# - Log both successful and unsuccessful attempts
+# - Add auth back in
+# -   Parameterize user + path from env vars
+# - Present forward_proxy for https://*:443, used for development
+#   - Have to work out SmallStep: https://github.com/caddyserver/caddy/issues/3021
+#   - If it has to be another block: use Caddyfile templating to make them identical!
 {
-	debug
-	http_port 80
-	https_port 443
 	log {
 		format console
 	}
-    local_certs
 }
 
-# https://{$ROUTE}:{$PORT}
-https://*:{$PORT}
+# Do NOT remove :443 from the start of this line. It's necessary for the
+# forward_proxy directive to operate
+:443, localhost
 route {
-
 	forward_proxy {
+		# TODO: Make configurable
+		# basic_auth {$USER} {$PASS}
+
 		# basic_auth user pass
+
 		acl {
-			allow *.google.com
+			# TODO: Make configurable
+			# allow {$ALLOWHOST}
+
+			# TODO: Parameterize from file
+			# allow_file {$ALLOWFILE}
+
+			# TODO: Also get a whole allow/deny list from an env var
+			# ${ALLOWHOSTS}
+
+			allow test-python-flask.app.cloud.gov
 			deny all
 		}
-		ports 80 443 22
-		# dial_timeout 30
-		# upstream         https://user:password@extra-upstream-hop.com
-		# hide_ip
-		# hide_via
-		# probe_resistance secret-link-kWWL9Q.com # alternatively you can use a real domain, such as caddyserver.com
-		serve_pac
-	}
 
+		# TODO: Make configurable. 
+		#   ports {$ALLOWPORT}
+
+		# TODO: Anything weird about expanding more than one?
+		#   ports {$ALLOWPORTS}
+
+		ports 80 443
+	}
 	file_server
 }
