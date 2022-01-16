@@ -1,0 +1,3 @@
+# The forward_proxy config references this filename.
+# S3 bucket names *might* appear here if PROXY_ATTACHED_BUCKETS is set.
+# Otherwise it stays empty

@@ -1,1 +1,0 @@
-allow test-python-flask.app.cloud.gov

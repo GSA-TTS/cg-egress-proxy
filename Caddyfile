@@ -25,15 +25,9 @@ route {
 	forward_proxy {
 		basic_auth {$USERNAME} {$PASSWORD}
 		acl {
-			# TODO: Make configurable
-			# allow {$ALLOWHOST}
 
-			# TODO: Parameterize from file
-			# allow_file {$ALLOWFILE}
-
-			# TODO: Also get a whole allow/deny list from an env var
-			# ${ALLOWHOSTS}
-            allow_file acl.txt
+            allow_file allow.s3.txt
+            allow_file allow.txt
 			deny all
 		}
 
