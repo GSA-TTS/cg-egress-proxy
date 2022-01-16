@@ -6,7 +6,8 @@ applications:
     routes: 
     - route: caddy.apps.internal
     health-check-type: process
-    instances: 1
+    instances: 2
+    memory: 64M
     command: ./caddy run --config Caddyfile
     env:
       USERNAME: user
