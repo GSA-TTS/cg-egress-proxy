@@ -12,5 +12,7 @@ applications:
     env:
       USERNAME: user
       PASSWORD: pass
-      LISTENPORT: 8080
+      LISTENPORT: "8080"
+      PROXY_ATTACHED_BUCKETS: true
+      # Make running curl tests from within the container easy
       https_proxy: https://user:pass@caddy.apps.internal:8080
