@@ -20,7 +20,7 @@
 
 # Do NOT remove :443 from the start of this line. It's necessary for the
 # forward_proxy directive to operate
-:8080
+:{$LISTENPORT}
 route {
 	forward_proxy {
 		basic_auth {$USERNAME} {$PASSWORD}
