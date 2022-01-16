@@ -8,3 +8,6 @@ applications:
     health-check-type: process
     instances: 1
     command: ./caddy run --config Caddyfile
+    env:
+      USERNAME: user
+      PASSWORD: pass

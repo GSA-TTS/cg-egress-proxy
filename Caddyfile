@@ -23,11 +23,7 @@
 :8080
 route {
 	forward_proxy {
-		# TODO: Make configurable
-		# basic_auth {$USER} {$PASS}
-
-		# basic_auth user pass
-
+		basic_auth {$USERNAME} {$PASSWORD}
 		acl {
 			# TODO: Make configurable
 			# allow {$ALLOWHOST}
