@@ -1,0 +1,10 @@
+---
+applications:
+  - name: caddy
+    buildpacks:
+      - binary_buildpack
+    routes: 
+    - route: caddy.apps.internal
+    health-check-type: process
+    instances: 1
+    command: ./caddy run --config Caddyfile

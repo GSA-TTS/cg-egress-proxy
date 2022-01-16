@@ -15,12 +15,12 @@
 		format console
         level DEBUG
 	}
-    # auto_https disable_redirects
+    auto_https off
 }
 
 # Do NOT remove :443 from the start of this line. It's necessary for the
 # forward_proxy directive to operate
-:443, localhost:8080
+:8080
 route {
 	forward_proxy {
 		# TODO: Make configurable
