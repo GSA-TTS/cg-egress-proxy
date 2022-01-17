@@ -4,7 +4,7 @@
 #   - Log unsuccessful attempts
 # - For development:
 #   - Add test Dockerfile/directory to compose, similar to what Aaron did for Logstash
-#   - curl tests can just run in the container, and reference localhost for the proxy!
+#   - curl tests could also just run in the container, and reference localhost
 #   - Then run with `docker-compose exec caddy test``
 
 {
@@ -16,7 +16,7 @@
     auto_https off
 }
 
-:{$PROXY_LISTENPORT}
+:{$PORT}
 route {
 	forward_proxy {
 		basic_auth {$PROXY_USERNAME} {$PROXY_PASSWORD}

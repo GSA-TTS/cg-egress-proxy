@@ -2,23 +2,25 @@ version: "3.7"
 
 services:
   caddy:
-    build: .
+    build: 
+      context: proxy
+      dockerfile: $PWD/Dockerfile
     restart: unless-stopped
     ports:
       - "8080:8080"
-      - "443:443"
     volumes:
-      - $PWD/Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
+      - $PWD/proxy:/etc/caddy
     environment:
-      - PORT=8080
-      - USER=user
-      - PASS=pass
-      # - ALLOWPORT=22
-      # - ALLOWPORTS="80 443"
-      # - ALLOWHOST="cnn.com"
+      # Solution to get Alpine to run the .profile comes from
+      # https://stackoverflow.com/a/43743532/17138235
+      - ENV=/srv/.profile
 
-volumes:
-  caddy_data:
-  caddy_config:
+      # Provide the CF env fixtures... more are needed!
+      - PORT=8080
+
+      # The variables that matter to the app
+      - PROXY_USERNAME=user
+      - PROXY_PASSWORD=pass
+      - PROXY_DENY="*.yahoo.com"
+      - PROXY_ALLOW= |
+        "*.google.com

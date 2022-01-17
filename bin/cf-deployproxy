@@ -105,7 +105,6 @@ for app in $applist ; do
     # TODO: We need some randomness here
     username=29e336de-da5c-48cb-8b23-b1b6352662b5
     password=e96fbae1-6ea0-4a5e-a997-5f308a2c37f1
-    listenport=8080
 
     # Auto-allow bound buckets
     proxydeny=$(  cat "$app".deny.acl )
@@ -118,7 +117,6 @@ for app in $applist ; do
 hostname: $proxyname
 username: $username
 password: $password
-listenport: 8080
 proxydeny: |
 $proxydeny
 proxyallow: |
@@ -134,7 +132,7 @@ $proxyallow
     fi
     $output cf target -o "$startorg" -s "$startspace"
     $output cf add-network-policy "$app" "$proxyname" -s "$egressspace" -o "$egressorg" --protocol tcp --port 8080
-    $output cf set-env "$app" https_proxy "https://$username:$password@$proxyname.apps.internal:$listenport"
+    $output cf set-env "$app" https_proxy "https://$username:$password@$proxyname.apps.internal:8080"
     $output cf restart "$app" --no-wait --strategy rolling
 
 done
