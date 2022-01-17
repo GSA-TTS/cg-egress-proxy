@@ -10,9 +10,13 @@ applications:
     memory: 64M
     command: ./caddy run --config Caddyfile
     env:
+      # Make running curl tests from within the container easy
+      https_proxy: https://user:pass@caddy.apps.internal:8080
       USERNAME: user
       PASSWORD: pass
       LISTENPORT: "8080"
       PROXY_ATTACHED_BUCKETS: true
-      # Make running curl tests from within the container easy
-      https_proxy: https://user:pass@caddy.apps.internal:8080
+      PROXY_HOSTS: |
+        *.google.com
+        *.cnn.com
+

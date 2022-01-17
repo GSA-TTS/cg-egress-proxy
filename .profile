@@ -15,6 +15,11 @@ sed -ne '/-----BEGIN RSA PRIVATE KEY-----/,/-----END RSA PRIVATE KEY-----/p' /et
 # It must exist, even if empty!
 touch allow.txt
 
+# Drop any blank lines
+PROXY_HOSTS=$(echo "$PROXY_HOSTS" | sed '/^[[:space:]]*$/d')
+
+cat >> allow.txt <<< "$PROXY_HOSTS"
+
 if [ -n "$PROXY_ATTACHED_BUCKETS" ]; then
     n=$(echo "$VCAP_SERVICES" | jq -r '.s3 | length')
     i=0
