@@ -17,46 +17,101 @@ Creators of of US federal systems are [required](https://csrc.nist.gov/projects/
 
 Deploying this egress proxy in front of your cloud.gov application will help you meet this requirement!
 
-<!-- assortedkeywords: nist rmf 800-53 fisma fedramp sc-7 gsa boundary egress -->
+<!-- assorted keywords: nist rmf 800-53 fisma fedramp sc-7 gsa boundary egress -->
 </details>
 
 ---
 
-## Deployment
+## Deploying the proxy by hand
 
-Deploy the proxy in a public_egress space. (Optionally deploy it in another org altogether.)
+Build the caddy binary
 
-    cf t -s prod-egress [-o otherorg]
-    cf push yourorg-proxy -d apps.internal []...]
+    $ make
 
-Enable your client to connect to the proxy
+Copy and edit the vars.yml-sample settings file. (Convention is to name it after your app.)
 
-    PORT=61443
+    $ cp vars.yml-sample vars.myapp.yml
+    $ $EDITOR vars.myapp.yml
+
+The values for proxydeny and proxyallow should consist of the relevant entries for your app, separated by spaces or newlines. Entries can be hostnames, IPs, or ranges for both, and can be expressed in many different forms. For examples, see [the upstream documentation](https://github.com/caddyserver/forwardproxy/blob/caddy2/README.md#caddyfile-syntax-server-configuration). 
+
+Deploy the proxy in a neighboring space with public egress. (Or optionally deploy it in another org altogether.)
+
+    $ cf t -s prod-egress [-o otherorg]
+    $ cf push --vars-file vars.myapp.yml
+
+Enable your client to connect to the proxy.
+
     cf t -s prod [-o yourorg]
-    cf add-network-policy app yourorg-proxy --port $PORT -s prod-egress [-o otherorg]
+    cf add-network-policy app myproxy --port $PORT -s prod-egress [-o otherorg]
 
-Tell your app about the proxy. (You can also set these env vars in your `.profile`.)
+Help your app find the the proxy.
 
-    cf set-env http_proxy  'https://yourorg-proxy.app.internal:61443'
-    cf set-env https_proxy 'https://yourorg-proxy.app.internal:61443'
+    $ cf set-env http_proxy  'https://user:pass@myproxy.app.internal:8080'
+    $ cf set-env https_proxy 'https://user:pass@myproxy.app.internal:8080'
 
-Test that the proxy configuration is correct, from the app perspective.
+Note that setting the environment variables this way is only for convenience. You may see credentials appear in log or `cf env` output, for example.
+
+It's better if you use one of these other options: 
+1. Use a [user-provied service]() to provide the URLs to your app.
+2. Use the [`.profile`](https://docs.cloudfoundry.org/devguide/deploy-apps/deploy-app.html#profile) to set these variables during your app's initialization.
+
+    #!/bin/bash
+    export http_proxy="https://user:pass@myproxy.app.internal:8080"
+    export https_proxy="https://user:pass@myproxy.app.internal:8080"
+
+## Deploying proxies for a bunch of apps automatically
+
+The `bin/cf-deployproxy` utility sets up proxies for many apps at once, following some simple conventions. You can specify deny and allow lists tailored for each application. The utility will also ensure that apps can reach any S3 bucket services that are bound to them.
+
+To set up tailored lists for each app, the utility reads a file called `<app>.deny.acl` for denied entries, and a file called `<app>.allow.acl` for allowed entries. The tool will create these files if they don't exist, and is safe to run multiple times. If you have a lot of apps to set up, just run it and then edit the files that are created.
+
+To learn more about how to use this tool, just run it!
+
+    $ bin/cf-deployproxy -h
+
+## Troubleshooting
+
+Test that curl connects properly from your application's container.
 
     # Get a shell inside the app
-    cf ssh app
-    /tmp/lifecycle/shell
+    $ cf ssh app -t -c "/tmp/lifecycle/launcher /home/vcap/app /bin/bash"
 
-    # Test that we can reach things we should
-    curl http://allowedhost:allowedport     # connects
-    curl https://allowedhost:allowedport    # connects
+    # Use curl to test that the container can reach things it should
+    $ curl http://allowedhost:allowedport     # connects
+    [...]
+    $ curl https://allowedhost:allowedport    # connects
+    [...]
     
-    # Test that we can't reach things we shouldn't
-    curl http://allowedhost:deniedport      # connection refused
-    curl http://deniedhost:allowedport      # connection refused
-    curl https://allowedhost:deniedport     # connection refused
-    curl https://deniedhost:allowedport     # connection refused
+    # Use curl to test that the container can't reach things it shouldn't
+    $ curl http://allowedhost:deniedport      # connection refused
+    curl: (56) Received HTTP code 403 from proxy after CONNECT
+    $ curl http://deniedhost:allowedport      # connection refused
+    curl: (56) Received HTTP code 403 from proxy after CONNECT
+    $ curl https://allowedhost:deniedport     # connection refused
+    curl: (56) Received HTTP code 403 from proxy after CONNECT
+    $ curl https://deniedhost:allowedport     # connection refused
+    curl: (56) Received HTTP code 403 from proxy after CONNECT
 
-If necessary, configure your app content to use the value in the `http_proxy` and `https_proxy` environment variables as the proxy setting when making egress connections.
+If that all looks OK: Remember, your app must implicitly or explicitly make use of use the `http_proxy` and `https_proxy` environment variables values when making connections to an allowedhost. Are you sure it's doing that?
+
+If not, then it's time to see if it's working from the proxy itself. Test that it works by SSH'ing and allowing the .profile to load.
+
+    $ cf ssh myapp -t -c "/tmp/lifecycle/shell /home/vcap/app /bin/bash"
+        $ curl https://notallowedhost
+        curl: (56) Received HTTP code 403 from proxy after CONNECT  # <-- This is good!
+        $ curl https://allowedhost
+        [...normal allowedhost response...]
+
+        # If something doesn't seem to be working right, add the -I and -v flags
+        $ curl -I -v https://deniedhost
+        [...pretty straightforward rejection from the proxy right after CONNECT...]
+        $ curl -I -v https://allowedhost
+        [...more information than you require...
+        
+        exit
+
+If that _doesn't_ look OK: You may be using the proxy in a new or unexpected way, or you may have found a bug. Please file an issue or otherwise contact the project's maintainers!
 
 ## How it works
 

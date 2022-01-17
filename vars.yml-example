@@ -1,12 +1,10 @@
-proxyname:  appname-proxy        # The name of the app (eg appname-proxy)
+proxyname:  appname-proxy        # The name of the proxy
 hostname:   appname-proxy        # hostname for the internal route
 username:   user                 # eg output of uuidgen
 password:   pass                 # eg output of uuidgen
 
-# Space- or newline-separated list of hosts/CIDRs to deny (even if they'd otherwise be allowed).
+# See [the docs]() for more about what can appear below
 proxydeny: "*.mail.google.com"
-
-# Space- or newline-separated list of hosts/CIDRs to allow
 proxyallow: |
   *.google.com
   *.cnn.com
