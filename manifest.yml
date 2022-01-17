@@ -1,22 +1,21 @@
 ---
+version: 1
 applications:
-  - name: caddy
+  - name: ((proxyname))
     buildpacks:
       - binary_buildpack
     routes: 
-    - route: caddy.apps.internal
+    - route: ((hostname)).apps.internal
     health-check-type: process
     instances: 2
     memory: 64M
     command: ./caddy run --config Caddyfile
     env:
       # Make running curl tests from within the container easy
-      https_proxy: https://user:pass@caddy.apps.internal:8080
-      USERNAME: user
-      PASSWORD: pass
-      LISTENPORT: "8080"
-      PROXY_ATTACHED_BUCKETS: true
-      PROXY_HOSTS: |
-        *.google.com
-        *.cnn.com
+      https_proxy: https://((username)):((password))@((hostname)).apps.internal:((listenport))
+      PROXY_USERNAME: ((username))
+      PROXY_PASSWORD: ((password))
+      PROXY_LISTENPORT: "((listenport))"
+      PROXY_DENY:  ((proxydeny))
+      PROXY_ALLOW: ((proxyallow))
 

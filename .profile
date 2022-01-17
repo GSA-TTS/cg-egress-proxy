@@ -11,26 +11,27 @@ sed -ne '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' /etc/cf-ass
 echo "Capturing key in key.pem..."
 sed -ne '/-----BEGIN RSA PRIVATE KEY-----/,/-----END RSA PRIVATE KEY-----/p' /etc/cf-assets/envoy_config/sds-c2c-cert-and-key.yaml | sed -e 's/^[ \t]*//' > key.pem
 
-# The forward_proxy directive references this file.
-# It must exist, even if empty!
-touch allow.txt
+# The forward_proxy directive references these files.
+# So they must exist, even if they will be empty!
+touch deny.acl
+touch allow.acl
 
-# Drop any blank lines
-PROXY_HOSTS=$(echo "$PROXY_HOSTS" | sed '/^[[:space:]]*$/d')
+# Ensure there's only one entry per line, and leave no whitespace
+PROXY_DENY=$(  echo -n "$PROXY_DENY"  | sed 's/^\S/ &/' | sed 's/\ /\n/g' | sed '/^\s*$/d' )
+PROXY_ALLOW=$( echo -n "$PROXY_ALLOW" | sed 's/^\S/ &/' | sed 's/\ /\n/g' | sed '/^\s*$/d' )
 
-cat >> allow.txt <<< "$PROXY_HOSTS"
+# Append to the appropriate files
+echo -n "$PROXY_DENY"  >> deny.acl
+echo -n "$PROXY_ALLOW" >> allow.acl
 
-if [ -n "$PROXY_ATTACHED_BUCKETS" ]; then
-    n=$(echo "$VCAP_SERVICES" | jq -r '.s3 | length')
-    i=0
-    while [ $i -lt "$n" ]
-    do
-        # Add attached buckets to the allow list
-        BUCKET=$(echo "$VCAP_SERVICES" | jq -r ".s3[$i].credentials.bucket")
-        AWS_ENDPOINT=$(echo "$VCAP_SERVICES" | jq -r ".s3[$i].credentials.endpoint")
-        AWS_FIPS_ENDPOINT=$(echo "$VCAP_SERVICES" | jq -r ".s3[$i].credentials.fips_endpoint")
-        cat >> allow.txt <<< "${BUCKET}"."${AWS_ENDPOINT}"
-        cat >> allow.txt <<< "${BUCKET}"."${AWS_FIPS_ENDPOINT}"
-        ((i+=1))
-    done
-fi
+# Newline Terminate Non-Empty File If Not Already
+# aka NTNEFINA aka ntnefina
+# https://stackoverflow.com/a/10082466/17138235
+function ntnefina {
+    if [ -s "$1" ] && [ "$(tail -c1 "$1"; echo x)" != $'\nx' ]; then
+        echo "" >> "$1"
+    fi
+}
+
+ntnefina deny.acl
+ntnefina allow.acl

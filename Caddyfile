@@ -1,42 +1,31 @@
 # TODO
-# - curl is working, why not Firefox?!
-# - Figure out how to expand an env var that contains spaces, *, newline, etc.
-# - Add test Dockerfile/directory to compose!
-# - Log both successful and unsuccessful attempts
-# - Add auth back in
-# -   Parameterize user + path from env vars
-# - Present forward_proxy for https://*:443, used for development
-#   - Have to work out SmallStep: https://github.com/caddyserver/caddy/issues/3021
-#   - If it has to be another block: use Caddyfile templating to make them identical!
+# - For staging/prod:
+#   - Log successful attempts
+#   - Log unsuccessful attempts
+# - For development:
+#   - Add test Dockerfile/directory to compose, similar to what Aaron did for Logstash
+#   - curl tests can just run in the container, and reference localhost for the proxy!
+#   - Then run with `docker-compose exec caddy test``
 
 {
 	debug
     log {
 		format console
-        level DEBUG
+        level INFO
 	}
     auto_https off
 }
 
-# Do NOT remove :443 from the start of this line. It's necessary for the
-# forward_proxy directive to operate
-:{$LISTENPORT}
+:{$PROXY_LISTENPORT}
 route {
 	forward_proxy {
-		basic_auth {$USERNAME} {$PASSWORD}
+		basic_auth {$PROXY_USERNAME} {$PROXY_PASSWORD}
 		acl {
-
-            allow_file allow.txt
-			deny all
+            deny_file  deny.acl
+            allow_file allow.acl
+            deny all
 		}
-
-		ports 80 443
-        serve_pac
+		ports 80 443 22
 	}
-
-    # We think this may be needed in order for serve_pac to the /proxy.pac.
-    # There is no evidence for that, really, but it appears in the example for forwardproxy.
-	file_server
 }
-
 tls cert.pem key.pem
