@@ -1,9 +1,0 @@
-#!/bin/bash
-
-# set -e
-set -x
-
-curl --proxy-insecure -x https://localhost:443 https://www.google.com
-curl --proxy-insecure -x https://localhost:443 https://test-python-flask.app.cloud.gov/
-curl --proxy-insecure -x https://localhost:8080 https://www.google.com
-curl --proxy-insecure -x https://localhost:8080 https://test-python-flask.app.cloud.gov/
