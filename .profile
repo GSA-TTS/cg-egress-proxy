@@ -2,13 +2,11 @@
 
 set -e
 
-echo Parsing certs...
-(cd /tmp && "$HOME"/parse_certs.sh)
+echo "Certificate info..."
+(cd /tmp && "$HOME"/bin/c2c-certinfo)
 
-echo "Capturing cert in cert.pem..."
+# Capture the .crt and .key as .pem files for Caddy
 sed -ne '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' /etc/cf-assets/envoy_config/sds-c2c-cert-and-key.yaml | sed -e 's/^[ \t]*//' > cert.pem
-
-echo "Capturing key in key.pem..."
 sed -ne '/-----BEGIN RSA PRIVATE KEY-----/,/-----END RSA PRIVATE KEY-----/p' /etc/cf-assets/envoy_config/sds-c2c-cert-and-key.yaml | sed -e 's/^[ \t]*//' > key.pem
 
 # The forward_proxy directive references these files.
