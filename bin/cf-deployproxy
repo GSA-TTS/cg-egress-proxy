@@ -41,8 +41,8 @@ fi
 appnames=$1
 
 # Grab the starting space and org where the command was run
-startorg=$(   cf target | grep org:   | cut -d : -f 2 | sed s/\ //g)
-startspace=$( cf target | grep space: | cut -d : -f 2 | sed s/\ //g)
+startorg=$(   cf target | grep org:   | awk --field-separator ' ' '{ print $2 }')
+startspace=$( cf target | grep space: | awk --field-separator ' ' '{ print $2 }')
 
 if [ -z "${appnames}" ]; then
     echo "ERROR: You must supply at least appnames."
