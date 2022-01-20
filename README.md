@@ -81,7 +81,7 @@ $ bin/cf-deployproxy -h
 ```
 
 ### Proxying S3 buckets
-The deployment utility will also automatically ensures that apps can reach the domain corresponding to any S3 bucket services that are bound to them.
+The deployment utility will also automatically ensure that apps can reach the domain corresponding to any S3 bucket services that are bound to them.
 
 *_Note:_* The AWS CLI `aws s3` subcommand cannot be configured with the platform-provided CA bundle, and rejects the certificate presented by the proxy! This means you can't use `aws s3` with the proxy. (We've filed [an upstream issue](https://github.com/aws/aws-cli/issues/6664) to attempt resolve that.) 
 
