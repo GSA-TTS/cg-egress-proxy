@@ -47,7 +47,7 @@ startspace=$( cf target | grep space: | cut -d : -f 2 | sed s/\ //g)
 if [ -z "${appnames}" ]; then
     echo "ERROR: You must supply at least appnames."
     echo "${usage}"
-    exit 1;
+    exit 1
 fi
 
 egressspace=${2:-${startspace}-egress}
@@ -65,17 +65,18 @@ for app in $applist ; do
     cf app "$app" > /dev/null 2>&1 || echo "ERROR: App ${app} is not available!" && missing=1
 done
 if [ -n "${appmissing}" ]; then
+    echo "Missing at least one specified app!"
     exit 1
 fi
-
 
 # Try to switch to the egress org+space, error out if it's not there
 cf target -o "$egressorg" -s "$egressspace"  > /dev/null 2>&1 || 
     (echo "ERROR: Space ${egressorg}/${egressspace} is not available!" && popspace && exit 1)
+popspace
 
 # If DRYRUN is set, don't run the commands, but echo them.
 if [ -n "${DRYRUN}" ]; then
-    output="echo"
+    output="echo # "
 fi
 
 for app in $applist ; do
@@ -127,8 +128,8 @@ $proxyallow
     $output cf target -o "$egressorg" -s "$egressspace"
     $output cf push --no-wait --strategy rolling --vars-file <(echo "$varsfile")
     if [ -n "${DRYRUN}" ]; then
-        echo "vars-file content:"
-        echo "$(echo "$varsfile" | sed -e 's/^/ --> /')"
+        echo "# vars-file content:"
+        echo "$(echo "$varsfile" | sed -e 's/^/#  -->/')"
     fi
     $output cf target -o "$startorg" -s "$startspace"
     $output cf add-network-policy "$app" "$proxyname" -s "$egressspace" -o "$egressorg" --protocol tcp --port 8080

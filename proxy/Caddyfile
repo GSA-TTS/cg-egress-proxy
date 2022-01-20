@@ -2,6 +2,8 @@
 # - For staging/prod:
 #   - Log successful attempts
 #   - Log unsuccessful attempts
+#   - Document how to tunnel sftp://
+#   - Document how to test with cf ssh port-forwarding to your browser!
 # - For development:
 #   - Add test Dockerfile/directory to compose, similar to what Aaron did for Logstash
 #   - curl tests could also just run in the container, and reference localhost
@@ -26,6 +28,7 @@ route {
             deny all
 		}
 		ports 80 443 22
+		serve_pac
 	}
 }
 tls cert.pem key.pem
