@@ -70,7 +70,7 @@ It's better if you use one of these other options:
     export https_proxy="https://user:pass@myproxy.app.internal:8080"
     ```
 
-## Deploying proxies for a bunch of apps automatically
+## Automatically deploying proxies for multiple apps
 
 The `bin/cf-deployproxy` utility sets up proxies for many apps at once, following some simple conventions. You can specify deny and allow lists tailored for each application. The utility reads a file called `<app>.deny.acl` for denied entries, and a file called `<app>.allow.acl` for allowed entries. The tool will create these files if they don't exist, and is safe to run multiple times. If you have a lot of apps to set up, just run the tool once, and then edit the files that are created and run it again.
 
