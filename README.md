@@ -43,14 +43,14 @@ The values for proxydeny and proxyallow should consist of the relevant entries f
 Deploy the proxy in a neighboring space with public egress. (Or optionally deploy it in another org altogether.)
 
 ```bash
-$ cf t -s prod-egress [-o otherorg]
+$ cf target -s prod-egress [-o otherorg]
 $ cf push --vars-file vars.myapp.yml
 ```
 
 Enable your client to connect to the proxy.
 
 ```bash
-cf t -s prod [-o yourorg]
+cf target -s prod [-o yourorg]
 cf add-network-policy app myproxy --port $PORT -s prod-egress [-o otherorg]
 ```
 
