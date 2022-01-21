@@ -103,9 +103,11 @@ for app in $applist ; do
 
     # Assemble vars.yml file content
     proxyname="proxy-$(echo "$startorg" | tr _. - )-$(echo "$startspace" | tr _. -)-${app}"
-    # TODO: We need some randomness here
-    username=29e336de-da5c-48cb-8b23-b1b6352662b5
-    password=e96fbae1-6ea0-4a5e-a997-5f308a2c37f1
+    # A function to generate a random quote-safe password
+    randpw(){ < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo; }
+
+    username="$(randpw)"
+    password="$(randpw)"
 
     # Auto-allow bound buckets
     proxydeny=$(  cat "$app".deny.acl )
