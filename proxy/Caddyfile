@@ -30,4 +30,8 @@ route {
 		serve_pac
 	}
 }
+log {
+	format console
+	level INFO
+}
 tls cert.pem key.pem
