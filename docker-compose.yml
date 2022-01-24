@@ -1,8 +1,9 @@
+---
 version: "3.7"
 
 services:
   caddy:
-    build: 
+    build:
       context: proxy
       dockerfile: $PWD/Dockerfile
     restart: unless-stopped

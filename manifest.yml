@@ -6,8 +6,8 @@ applications:
     buildpacks:
       - https://github.com/cloudfoundry/apt-buildpack
       - binary_buildpack
-    routes: 
-    - route: ((hostname)).apps.internal
+    routes:
+      - route: ((hostname)).apps.internal
     health-check-type: process
     instances: 2
     memory: 64M
@@ -15,6 +15,5 @@ applications:
     env:
       PROXY_USERNAME: ((username))
       PROXY_PASSWORD: ((password))
-      PROXY_DENY:  ((proxydeny))
+      PROXY_DENY: ((proxydeny))
       PROXY_ALLOW: ((proxyallow))
-
