@@ -4,13 +4,14 @@ applications:
   - name: ((proxyname))
     path: proxy
     buildpacks:
+      - https://github.com/cloudfoundry/apt-buildpack
       - binary_buildpack
     routes: 
     - route: ((hostname)).apps.internal
     health-check-type: process
     instances: 2
     memory: 64M
-    command: ./caddy run --config Caddyfile
+    command: ./start.sh
     env:
       PROXY_USERNAME: ((username))
       PROXY_PASSWORD: ((password))

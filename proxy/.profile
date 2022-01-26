@@ -8,13 +8,6 @@ ENABLE_ASH_BASH_COMPAT=1
 
 set -e
 
-echo "Certificate info..."
-(cd /tmp && "$HOME"/bin/c2c-certinfo)
-
-# Capture the .crt and .key as .pem files for Caddy
-sed -ne '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/p' /etc/cf-assets/envoy_config/sds-c2c-cert-and-key.yaml | sed -e 's/^[ \t]*//' > cert.pem
-sed -ne '/-----BEGIN RSA PRIVATE KEY-----/,/-----END RSA PRIVATE KEY-----/p' /etc/cf-assets/envoy_config/sds-c2c-cert-and-key.yaml | sed -e 's/^[ \t]*//' > key.pem
-
 # Ensure there's only one entry per line, and leave no whitespace
 PROXY_DENY=$(  echo -n "$PROXY_DENY"  | sed 's/^\S/ &/' | sed 's/\ /\n/g' | sed '/^\s*$/d' )
 PROXY_ALLOW=$( echo -n "$PROXY_ALLOW" | sed 's/^\S/ &/' | sed 's/\ /\n/g' | sed '/^\s*$/d' )
@@ -45,3 +38,6 @@ echo
 echo
 echo "The proxy connection URL is:"
 echo "  $https_proxy"
+
+# Ensure the inotify-tools binaries are found
+export PATH=$PATH:/home/vcap/deps/0/apt/usr/bin
