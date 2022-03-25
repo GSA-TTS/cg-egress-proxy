@@ -43,14 +43,14 @@ The values for proxydeny and proxyallow should consist of the relevant entries f
 Deploy the proxy in a neighboring space with public egress. (Or optionally deploy it in another org altogether.)
 
 ```bash
-$ cf t -s prod-egress [-o otherorg]
+$ cf target -s prod-egress [-o otherorg]
 $ cf push --vars-file vars.myapp.yml
 ```
 
 Enable your client to connect to the proxy.
 
 ```bash
-cf t -s prod [-o yourorg]
+cf target -s prod [-o yourorg]
 cf add-network-policy app myproxy --port $PORT -s prod-egress [-o otherorg]
 ```
 
@@ -70,9 +70,9 @@ It's better if you use one of these other options:
     export https_proxy="https://user:pass@myproxy.app.internal:8080"
     ```
 
-## Deploying proxies for a bunch of apps automatically
+## Automatically deploying proxies for multiple apps
 
-The `bin/cf-deployproxy` utility sets up proxies for many apps at once, following some simple conventions. You can specify deny and allow lists tailored for each application. The utility reads a file called `<app>.deny.acl` for denied entries, and a file called `<app>.allow.acl` for allowed entries. The tool will create these files if they don't exist, and is safe to run multiple times. If you have a lot of apps to set up, just run the tool once, and then edit the files that are created and run it again.
+The `bin/cf-deployproxy` utility is used to automate the process of setting up a proxy for each app that may need one, following some simple conventions. You can specify deny and allow lists tailored for each application. The utility reads a file called `<app>.deny.acl` for denied entries, and a file called `<app>.allow.acl` for allowed entries. The tool will create these files if they don't exist, and is safe to run multiple times. If you have a lot of apps to set up, just run the tool once, and then edit the files that are created and run it again.
 
 To learn more about how to use this tool, just run it!
 
@@ -80,8 +80,8 @@ To learn more about how to use this tool, just run it!
 $ bin/cf-deployproxy -h
 ```
 
-### Proxying S3 buckets
-The deployment utility will also automatically ensures that apps can reach the domain corresponding to any S3 bucket services that are bound to them.
+### Proxying S3 Bucket access
+The deployment utility will also automatically ensure that apps can reach the domain corresponding to any S3 bucket services that are bound to them.
 
 *_Note:_* The AWS CLI `aws s3` subcommand cannot be configured with the platform-provided CA bundle, and rejects the certificate presented by the proxy! This means you can't use `aws s3` with the proxy. (We've filed [an upstream issue](https://github.com/aws/aws-cli/issues/6664) to attempt resolve that.) 
 
