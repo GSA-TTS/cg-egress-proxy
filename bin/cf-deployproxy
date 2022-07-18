@@ -60,18 +60,24 @@ function popspace() {
 }
 trap popspace exit
 
+apps_missing=0
+function appmissing() {
+    echo "ERROR: App $1 is not available!"
+    ((apps_missing+=1))
+}
+
 # Check that all apps are there, or error out
 for app in $applist ; do
-    cf app "$app" > /dev/null 2>&1 || (echo "ERROR: App ${app} is not available!" && appmissing=1)
+    cf app "$app" > /dev/null 2>&1 || appmissing "$app"
 done
-if [ -n "${appmissing}" ]; then
+if [ $apps_missing -gt 0 ]; then
     echo "Missing at least one specified app!"
     exit 1
 fi
 
 # Try to switch to the egress org+space, error out if it's not there
 cf target -o "$egressorg" -s "$egressspace"  > /dev/null 2>&1 ||
-    (echo "ERROR: Space ${egressorg}/${egressspace} is not available!" && popspace && exit 1)
+    (echo "ERROR: Space ${egressorg}/${egressspace} is not available!" && exit 1)
 popspace
 
 # If DRYRUN is set, don't run the commands, but echo them.
@@ -139,5 +145,3 @@ $proxyallow
     $output cf restart "$app" --no-wait --strategy rolling
 
 done
-
-popspace
