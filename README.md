@@ -51,7 +51,7 @@ Enable your client to connect to the proxy. [Port 61443 implicitly terminates TL
 
 ```bash
 cf target -s prod [-o yourorg]
-cf add-network-policy app myproxy --port 61443 -s prod-egress [-o otherorg]
+cf add-network-policy app myproxy --protocol tcp --port 61443 -s prod-egress [-o otherorg]
 ```
 
 Help your app find the the proxy.
@@ -62,7 +62,7 @@ Help your app find the the proxy.
 Note that setting the environment variables this way is only for convenience. You may see credentials appear in log or `cf env` output, for example.
 
 It's better if you use one of these other options: 
-1. Use a [user-provied service]() to provide the URLs to your app.
+1. Use a [user-provided service](https://docs.cloudfoundry.org/devguide/services/user-provided.html) to provide the URLs to your app.
 2. Use the [`.profile`](https://docs.cloudfoundry.org/devguide/deploy-apps/deploy-app.html#profile) to set these variables during your app's initialization.
     ```bash
     #!/bin/bash
