@@ -47,17 +47,17 @@ $ cf target -s prod-egress [-o otherorg]
 $ cf push --vars-file vars.myapp.yml
 ```
 
-Enable your client to connect to the proxy.
+Enable your client to connect to the proxy. [Port 61443 implicitly terminates TLS for the proxy.](https://docs.cloudfoundry.org/concepts/understand-cf-networking.html#securing-traffic)
 
 ```bash
 cf target -s prod [-o yourorg]
-cf add-network-policy app myproxy --port $PORT -s prod-egress [-o otherorg]
+cf add-network-policy app myproxy --port 61443 -s prod-egress [-o otherorg]
 ```
 
 Help your app find the the proxy.
 
-    $ cf set-env http_proxy  'https://user:pass@myproxy.app.internal:8080'
-    $ cf set-env https_proxy 'https://user:pass@myproxy.app.internal:8080'
+    $ cf set-env http_proxy  'https://user:pass@myproxy.app.internal:61443'
+    $ cf set-env https_proxy 'https://user:pass@myproxy.app.internal:61443'
 
 Note that setting the environment variables this way is only for convenience. You may see credentials appear in log or `cf env` output, for example.
 
@@ -66,8 +66,8 @@ It's better if you use one of these other options:
 2. Use the [`.profile`](https://docs.cloudfoundry.org/devguide/deploy-apps/deploy-app.html#profile) to set these variables during your app's initialization.
     ```bash
     #!/bin/bash
-    export http_proxy="https://user:pass@myproxy.app.internal:8080"
-    export https_proxy="https://user:pass@myproxy.app.internal:8080"
+    export http_proxy="https://user:pass@myproxy.app.internal:61443"
+    export https_proxy="https://user:pass@myproxy.app.internal:61443"
     ```
 
 ## Automatically deploying proxies for multiple apps
