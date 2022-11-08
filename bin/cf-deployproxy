@@ -97,10 +97,11 @@ for app in $applist ; do
         # Add attached buckets to the allow list
         BUCKET=$(            echo "$VCAP_SERVICES" | jq -r ".s3[$i].credentials.bucket")
         AWS_ENDPOINT=$(      echo "$VCAP_SERVICES" | jq -r ".s3[$i].credentials.endpoint")
+        AWS_ALT_ENDPOINT=$(  echo "$AWS_ENDPOINT" | sed 's/^s3-/s3./')
         AWS_FIPS_ENDPOINT=$( echo "$VCAP_SERVICES" | jq -r ".s3[$i].credentials.fips_endpoint")
 
-        # Add both the FIPS and non-FIPS hostnames
-        buckethosts="$buckethosts ${BUCKET}.${AWS_ENDPOINT} ${BUCKET}.${AWS_FIPS_ENDPOINT}"
+        # Add both the FIPS and non-FIPS hostnames, and the alt format of BUCKET.s3.REGION... that boto3 uses
+        buckethosts="$buckethosts ${BUCKET}.${AWS_ENDPOINT} ${BUCKET}.${AWS_ALT_ENDPOINT} ${BUCKET}.${AWS_FIPS_ENDPOINT}"
         ((i+=1))
     done
 
