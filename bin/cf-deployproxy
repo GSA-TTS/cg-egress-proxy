@@ -121,8 +121,8 @@ for app in $applist ; do
     proxyallow=$( cat "$app".allow.acl <(echo "$buckethosts") )
 
     # Normalize into a YAML multiline block form
-    proxydeny=$(  echo "$proxydeny"  | sed 's/^\S/ &/' | sed 's/\ /\n  /g' | sed '/^\s*$/d' )
-    proxyallow=$( echo "$proxyallow" | sed 's/^\S/ &/' | sed 's/\ /\n  /g' | sed '/^\s*$/d' )
+    proxydeny=$(  echo "$proxydeny"  | sed 's/^[^[:space:]]/ &/' | sed 's/\ /\n  /g' | sed '/^\s*$/d' )
+    proxyallow=$( echo "$proxyallow" | sed 's/^[^[:space:]]/ &/' | sed 's/\ /\n  /g' | sed '/^\s*$/d' )
     varsfile="proxyname: $proxyname
 hostname: $proxyname
 username: $username
