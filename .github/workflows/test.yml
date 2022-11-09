@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    name: Test that Caddyfile builds
+    name: Test that caddy builds + Validate Caddyfile
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -24,3 +24,5 @@ jobs:
           --with github.com/hairyhenderson/caddy-teapot-module@v0.0.3-0
           --with github.com/caddyserver/forwardproxy@caddy2
           --output proxy/caddy
+      - name: validate Caddyfile
+        run: caddy validate
