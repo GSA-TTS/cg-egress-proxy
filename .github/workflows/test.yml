@@ -1,0 +1,26 @@
+---
+name: Tests
+
+on:
+  push:
+
+
+jobs:
+  test:
+    name: Test that Caddyfile builds
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: build caddy - setup go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.19.3'
+      - name: build caddy - get xcaddy
+        run: go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
+      - name: build caddy - xcaddy build
+        run: >
+          xcaddy build
+          --with github.com/hairyhenderson/caddy-teapot-module@v0.0.3-0
+          --with github.com/caddyserver/forwardproxy@caddy2
+          --output proxy/caddy
