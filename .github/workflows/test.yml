@@ -25,4 +25,4 @@ jobs:
           --with github.com/caddyserver/forwardproxy@caddy2
           --output proxy/caddy
       - name: validate Caddyfile
-        run: ./proxy/caddy validate
+        run: make validate
