@@ -1,7 +1,7 @@
 #!/bin/bash
 
 c2c_cert_watcher() {
-    while true ; do 
+    while true ; do
         echo "C2C certificate info..."
         (cd /tmp && ~/bin/c2c-certinfo)
 
@@ -11,7 +11,7 @@ c2c_cert_watcher() {
 
         # If Caddy's already up, tell it to reload its config
         # NOTE: We expect this to fail (the first time, when Caddy isn't running yet)!
-        ./caddy reload > /dev/null 2>&1 || true
+        ./caddy reload --force > /dev/null 2>&1 || true
 
         # Do this again when the cert file is modified
         inotifywait -q -e modify /etc/cf-assets/envoy_config/sds-c2c-cert-and-key.yaml
