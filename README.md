@@ -6,6 +6,9 @@ Compromised applications are often used to exfiltrate data, participate in [DoS]
 
 The app in this repository implements controlled egress traffic for applications running on [cloud.gov](https://cloud.gov), and should work on other [Cloud Foundry](https://cloudfoundry.org)-based platforms as well.
 
+**Note:**
+>This project is not currently officially supported by the cloud.gov team due to the diveristy of use-cases and complexity of configurations possible. The cloud.gov support team cannot guarantee that they can assist in debugging the use of this proxy, and can only assist in support for this proy to users under an official support package. 
+
 <details>
 <summary>Want to know about NIST 800-53 SC-7? Click here...</summary>
 
