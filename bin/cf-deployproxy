@@ -166,8 +166,8 @@ $proxyallow
         echo "$(echo "$varsfile" | sed -e 's/^/#  -->/')"
     fi
     $output cf target -o "$startorg" -s "$startspace"
-    $output cf add-network-policy "$app" "$proxyname" -s "$egressspace" -o "$egressorg" --protocol tcp --port 8080
-    $output cf set-env "$app" "$envvariablename" "https://$username:$password@$proxyname.apps.internal:8080"
+    $output cf add-network-policy "$app" "$proxyname" -s "$egressspace" -o "$egressorg" --protocol tcp --port 61443
+    $output cf set-env "$app" "$envvariablename" "https://$username:$password@$proxyname.apps.internal:61443"
     $output cf restart "$app" --no-wait --strategy rolling
 
 done
