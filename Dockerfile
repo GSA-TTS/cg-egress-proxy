@@ -3,6 +3,7 @@
 
 FROM caddy:2.5.1-builder AS builder
 
+ARG GOARCH=amd64
 RUN xcaddy build \
     --with github.com/caddyserver/forwardproxy@caddy2
 

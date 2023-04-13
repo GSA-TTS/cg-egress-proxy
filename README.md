@@ -7,12 +7,12 @@ Compromised applications are often used to exfiltrate data, participate in [DoS]
 The app in this repository implements controlled egress traffic for applications running on [cloud.gov](https://cloud.gov), and should work on other [Cloud Foundry](https://cloudfoundry.org)-based platforms as well.
 
 **Note:**
->This project is not currently officially supported by the cloud.gov team due to the diveristy of use-cases and complexity of configurations possible. The cloud.gov support team cannot guarantee that they can assist in debugging the use of this proxy, and can only assist in the use of this proxy to users under an official support package with cloud.gov. 
+>This project is not currently officially supported by the cloud.gov team due to the diveristy of use-cases and complexity of configurations possible. The cloud.gov support team cannot guarantee that they can assist in debugging the use of this proxy, and can only assist in the use of this proxy to users under an official support package with cloud.gov.
 
 <details>
 <summary>Want to know about NIST 800-53 SC-7? Click here...</summary>
 
-### Hello Compliance and security nerds! 
+### Hello Compliance and security nerds!
 
 Creators of of US federal systems are [required](https://csrc.nist.gov/projects/risk-management/fisma-background) to implement baseline [security and privacy controls](https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final) appropriate to the system's [sensitivity](https://www.nist.gov/privacy-framework/fips-199). [Control SC-7](https://csrc.nist.gov/Projects/risk-management/sp800-53-controls/release-search#!/control?version=5.1&number=sc-7) includes this text:
 
@@ -64,7 +64,7 @@ $ cp vars.yml-sample vars.myapp.yml
 $ $EDITOR vars.myapp.yml
 ```
 
-The values for proxydeny and proxyallow should consist of the relevant entries for your app, separated by spaces or newlines. Entries can be hostnames, IPs, or ranges for both, and can be expressed in many different forms. For examples, see [the upstream documentation](https://github.com/caddyserver/forwardproxy/blob/caddy2/README.md#caddyfile-syntax-server-configuration). 
+The values for proxydeny and proxyallow should consist of the relevant entries for your app, separated by spaces or newlines. Entries can be hostnames, IPs, or ranges for both, and can be expressed in many different forms. For examples, see [the upstream documentation](https://github.com/caddyserver/forwardproxy/blob/caddy2/README.md#caddyfile-syntax-server-configuration).
 
 Deploy the proxy in a neighboring space with public egress. (Or optionally deploy it in another org altogether.)
 
@@ -87,7 +87,7 @@ Help your app find the the proxy.
 
 Note that setting the environment variables this way is only for convenience. You may see credentials appear in log or `cf env` output, for example.
 
-It's better if you use one of these other options: 
+It's better if you use one of these other options:
 1. Use a [user-provided service](https://docs.cloudfoundry.org/devguide/services/user-provided.html) to provide the URLs to your app.
 2. Use the [`.profile`](https://docs.cloudfoundry.org/devguide/deploy-apps/deploy-app.html#profile) to set these variables during your app's initialization.
     ```bash
@@ -109,7 +109,7 @@ $ bin/cf-deployproxy -h
 ### Proxying S3 Bucket access
 The deployment utility will also automatically ensure that apps can reach the domain corresponding to any S3 bucket services that are bound to them.
 
-*_Note:_* The AWS CLI `aws s3` subcommand cannot be configured with the platform-provided CA bundle, and rejects the certificate presented by the proxy! This means you can't use `aws s3` with the proxy. (We've filed [an upstream issue](https://github.com/aws/aws-cli/issues/6664) to attempt resolve that.) 
+*_Note:_* The AWS CLI `aws s3` subcommand cannot be configured with the platform-provided CA bundle, and rejects the certificate presented by the proxy! This means you can't use `aws s3` with the proxy. (We've filed [an upstream issue](https://github.com/aws/aws-cli/issues/6664) to attempt resolve that.)
 
 You can still use S3 through the proxy, but since you can't use the AWS CLI, you have to take care of adding the content of the files in `$CF_SYSTEM_CERT_PATH/*` to the CA trust store for your application on your own. We've looked up examples of doing that for [Go](https://forfuncsake.github.io/post/2017/08/trust-extra-ca-cert-in-go-app/), [Python](https://appdividend.com/2020/06/19/python-certifi-example-how-to-use-ssl-certificate-in-python/), [Ruby](https://docs.ruby-lang.org/en/2.4.0/OpenSSL/X509/Store.html), [PHP](https://stackoverflow.com/a/70318246), and [Java](https://stackoverflow.com/a/62508063).
 
@@ -122,23 +122,23 @@ Test that curl connects properly from your application's container.
 $ cf ssh app -t -c "/tmp/lifecycle/launcher /home/vcap/app /bin/bash"
 
 # Use curl to test that the container can reach things it should
-$ curl http://allowedhost:allowedport                      
+$ curl http://allowedhost:allowedport
 [...response from allowedhost...] # allowed
 
-$ curl https://allowedhost:allowedport                     
+$ curl https://allowedhost:allowedport
 [...response from allowedhost...] # allowed
 
 # Use curl to test that the container can't reach things it shouldn't
-$ curl http://allowedhost:deniedport                      
+$ curl http://allowedhost:deniedport
 curl: (56) Received HTTP code 403 from proxy after CONNECT # denied
 
-$ curl http://deniedhost:allowedport                      
+$ curl http://deniedhost:allowedport
 curl: (56) Received HTTP code 403 from proxy after CONNECT # denied
 
-$ curl https://allowedhost:deniedport                     
+$ curl https://allowedhost:deniedport
 curl: (56) Received HTTP code 403 from proxy after CONNECT # denied
 
-$ curl https://deniedhost:allowedport                     
+$ curl https://deniedhost:allowedport
 curl: (56) Received HTTP code 403 from proxy after CONNECT # denied
 ```
 
@@ -179,7 +179,7 @@ If that _doesn't_ look OK: You may be using the proxy in a new or unexpected way
   - It CAN'T see the content of requests to https:// destinations
     - The TLS exchange between the client and destination happens post-`CONNECT` directly over a TCP tunnel. Caddy just sends and receives the bytes.
 - An `apps.internal` route makes the proxy resolveable by other applications.
-- Apps cannot actually send bytes to the proxy's port without an explicit `cf add-network-policy app proxy -s proxy-space -o proxy-org`. 
+- Apps cannot actually send bytes to the proxy's port without an explicit `cf add-network-policy app proxy -s proxy-space -o proxy-org`.
 - An appropriate network policy can only be created by someone with SpaceDeveloper permissions in both the source and destination space.
 
 ## For development
@@ -187,8 +187,9 @@ If that _doesn't_ look OK: You may be using the proxy in a new or unexpected way
 _NOTE: This information is out of date, and needs updating... PRs welcome!_
 ## Local testing
 
-1. Run `docker compose up --build`.
-2. Test allowed and denied destinations and ports (TODO this should just run a script inside the container):
+1. Run `docker compose build`. If running on an ARM machine, such as an Apple Silicon Mac, run `docker compose build --build-arg GOARCH=arm`
+1. Run `docker compose up`
+1. Test allowed and denied destinations and ports (TODO this should just run a script inside the container):
 
 ```bash
 docker-compose exec caddy curl https://allowedhost:allowedport # (allowed) PASS
@@ -202,7 +203,7 @@ docker-compose exec caddy curl https://deniedhost:allowedport # (denied) PASS
 Caddy is configured to listen on port 8080, using certificates signed with its own root CA. This means you WILL see cert errors if you set `https_proxy=https://localhost:443` as the proxy for your local client. To avoid that, you can add Caddy's internal root CA certificate to the CA bundle for either your client, or your OS. However, be prepared for the fact that this certificate changes every time you `docker compose up`!
 
 The root CA certificate is in the Caddy container at `/data/caddy/pki/authorities/local/root.crt`. Grab it by running
-```bash 
+```bash
 docker compose cp caddy:/data/caddy/pki/authorities/local/root.crt .`
 ```
 
