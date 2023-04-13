@@ -29,23 +29,29 @@ Deploying this egress proxy in front of your cloud.gov application will help you
 
 ```mermaid
     C4Context
-      title controlled egress proxy for Cloud Foundry spaces
+      title controlled egress for Cloud Foundry spaces
       Boundary(system, "system boundary") {
           Boundary(trusted_local_egress, "egress-controlled space", "trusted-local-egress ASG") {
-            System(application, "Application", "main application logic")
+            System(application, "application", "main application logic")
           }
 
           Boundary(public_egress, "egress-permitted space", "public-egress ASG") {
             System(https_proxy, "web egress proxy", "proxy for HTTP/S connections")
+            System(mail_proxy, "mail egress proxy", "proxy for SMTPS connections")
           }
       }
       
       Boundary(external_boundary, "external boundary") {
-        System(external_service, "external service", "service that the application relies on")
+        System(web_service, "web service", "allowed HTTP/S service")
+      }
+      Boundary(enterprise_boundary, "enterprise boundary") {
+        System(mail_service, "mail service", "allowed SMTPS service")
       }
 
       Rel(application, https_proxy, "makes request", "HTTP/S")
-      Rel(https_proxy, external_service, "proxies request", "HTTP/S")
+      Rel(application, mail_proxy, "send mail", "SMTPS")
+      Rel(https_proxy, web_service, "proxies request", "HTTP/S")
+      Rel(mail_proxy, mail_service, "proxies mail", "SMTPS")
 ```
 
 ## Deploying the proxy by hand
