@@ -1,6 +1,6 @@
 ---
 name: Keep binary updated
-# Periodically rebuild from the upstream "latest" releases, then raise a new 
+# Periodically rebuild from the upstream "latest" releases, then raise a new
 # pull-request if the binary file changed.
 #
 # Cribs heavily from this example:
@@ -22,7 +22,7 @@ jobs:
       - name: Did anything change?
         id: vars
         run: |
-          branchname="binary-update/${{ github.head_ref }}"
+          branchname="binary-update/${{ github.ref_name }}"
           echo "branchname=${branchname}" >> $GITHUB_OUTPUT
           binaryupdated=$(git status --porcelain | cut -d ' ' -f 2 | wc -l)
           echo "binaryupdated=${binaryupdated}" >> $GITHUB_OUTPUT
@@ -30,10 +30,9 @@ jobs:
         if: steps.vars.outputs.binaryupdated != 0
         uses: peter-evans/create-pull-request@v4
         with:
-          commit-message: Update binary for ${{ github.head_ref }}
-          title: Update binary for ${{ github.head_ref }}
-          body: This is an auto-generated PR to add an updated binary on ${{ github.head_ref }}.
+          commit-message: Update binary for ${{ github.ref_name }}
+          title: Update caddy binary for ${{ github.ref_name }}
+          body: This is an auto-generated PR to add an updated binary on ${{ github.ref_name }}.
           labels: binary-update, automated-pr
           branch: ${{ steps.vars.outputs.branchname }}
-          base: ${{ github.head_ref }}
-
+          base: ${{ github.ref_name }}
