@@ -7,6 +7,7 @@ name: Keep binary updated
 # https://github.com/peter-evans/create-pull-request/blob/main/docs/examples.md#use-case-create-a-pull-request-to-modifyfix-pull-requests
 
 on:
+  workflow_dispatch:
   schedule:
     # Runs every night at 1:20am
     - cron: "20 1 * * *"
