@@ -33,7 +33,7 @@ jobs:
           commit-message: Update binary for ${{ github.head_ref }}
           title: Update binary for ${{ github.head_ref }}
           body: This is an auto-generated PR to add an updated binary on ${{ github.head_ref }}.
-          labels: binary-update, automated pr
+          labels: binary-update, automated-pr
           branch: ${{ steps.vars.outputs.branchname }}
           base: ${{ github.head_ref }}
 
