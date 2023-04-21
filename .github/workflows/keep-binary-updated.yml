@@ -1,0 +1,38 @@
+---
+name: Keep binary updated
+# Periodically rebuild from the upstream "latest" releases, then raise a new 
+# pull-request if the binary file changed.
+#
+# Cribs heavily from this example:
+# https://github.com/peter-evans/create-pull-request/blob/main/docs/examples.md#use-case-create-a-pull-request-to-modifyfix-pull-requests
+
+on:
+  schedule:
+    # Runs every night at 1:20am
+    - cron: "20 1 * * *"
+
+jobs:
+  keep-binary-up-to-date:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Regenerate binary
+        run: make
+      - name: Did anything change?
+        id: vars
+        run: |
+          branchname="binary-update/${{ github.head_ref }}"
+          echo "branchname=${branchname}" >> $GITHUB_OUTPUT
+          binaryupdated=$(git status --porcelain | cut -d ' ' -f 2 | wc -l)
+          echo "binaryupdated=${binaryupdated}" >> $GITHUB_OUTPUT
+      - name: Create PR with changes
+        if: steps.vars.outputs.binaryupdated != 0
+        uses: peter-evans/create-pull-request@v4
+        with:
+          commit-message: Update binary for ${{ github.head_ref }}
+          title: Update binary for ${{ github.head_ref }}
+          body: This is an auto-generated PR to add an updated binary on ${{ github.head_ref }}.
+          labels: binary-update, automated pr
+          branch: ${{ steps.vars.outputs.branchname }}
+          base: ${{ github.head_ref }}
+
