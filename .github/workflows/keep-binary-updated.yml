@@ -9,8 +9,8 @@ name: Keep binary updated
 on:
   workflow_dispatch:
   schedule:
-    # Runs every night at 1:20am
-    - cron: "20 1 * * *"
+    # Runs every night around 4:20am EST/1:20am PST
+    - cron: "20 8 * * *"
 
 jobs:
   keep-binary-up-to-date:
