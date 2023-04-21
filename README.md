@@ -48,13 +48,6 @@ Deploying this egress proxy in front of your cloud.gov application will help you
       Rel(https_proxy, external_service, "proxies request", "HTTP/S")
 ```
 
-## Preparation
-Build the caddy binary
-
-```bash
-$ make
-```
-
 ## Deploying the proxy by hand
 
 Copy and edit the vars.yml-sample settings file. (Convention is to name it after your app.)
@@ -179,26 +172,32 @@ If that _doesn't_ look OK: You may be using the proxy in a new or unexpected way
   - It CAN'T see the content of requests to https:// destinations
     - The TLS exchange between the client and destination happens post-`CONNECT` directly over a TCP tunnel. Caddy just sends and receives the bytes.
 - An `apps.internal` route makes the proxy resolveable by other applications.
-- Apps cannot actually send bytes to the proxy's port without an explicit `cf add-network-policy app proxy -s proxy-space -o proxy-org`.
+- Apps cannot actually send bytes to the proxy's port without an explicit `cf add-network-policy app proxy --protocol tcp --port 61443 -s proxy-space -o proxy-org`.
 - An appropriate network policy can only be created by someone with SpaceDeveloper permissions in both the source and destination space.
 
-## For development
+## For local development
 
-_NOTE: This information is out of date, and needs updating... PRs welcome!_
+A custom Caddy binary with a forward-proxy plugin is included in the `proxy/` directory. If you ever need to rebuild the Caddy binary yourself locally, run:
+
+```bash
+$ make
+```
+
+
 ## Local testing
 
 1. Run `docker compose build`. If running on an ARM machine, such as an Apple Silicon Mac, run `docker compose build --build-arg GOARCH=arm`
 1. Run `docker compose up`
-1. Test allowed and denied destinations and ports (TODO this should just run a script inside the container):
-
-```bash
-docker-compose exec caddy curl https://allowedhost:allowedport # (allowed) PASS
-docker-compose exec caddy curl https://allowedhost:deniedport # (denied) PASS
-docker-compose exec caddy curl https://deniedhost:allowedport # (denied) PASS
-```
-
+1. Test allowed and denied destinations and ports (TODO: This should just run a script inside the container):
+    ```bash
+    docker-compose exec caddy curl https://allowedhost:allowedport # (allowed) PASS
+    docker-compose exec caddy curl https://allowedhost:deniedport # (denied) PASS
+    docker-compose exec caddy curl https://deniedhost:allowedport # (denied) PASS
+    ```
+1. Run `docker compose down`
 
 ### If you want to hand test using your browser...
+_NOTE: This information is out of date, and needs updating... PRs welcome!_
 
 Caddy is configured to listen on port 8080, using certificates signed with its own root CA. This means you WILL see cert errors if you set `https_proxy=https://localhost:443` as the proxy for your local client. To avoid that, you can add Caddy's internal root CA certificate to the CA bundle for either your client, or your OS. However, be prepared for the fact that this certificate changes every time you `docker compose up`!
 
