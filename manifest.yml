@@ -3,6 +3,7 @@ version: 1
 applications:
   - name: ((proxyname))
     path: proxy
+    stack: cflinuxfs4
     buildpacks:
       - binary_buildpack
     routes:
