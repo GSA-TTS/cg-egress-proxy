@@ -34,7 +34,14 @@ ntnefina allow.acl
 # Make it easy to run curl tests on ourselves
 https_proxy="https://$PROXY_USERNAME:$PROXY_PASSWORD@$(echo "$VCAP_APPLICATION" |  jq .application_uris[0] | sed 's/"//g'):61443"
 export https_proxy
-echo 
+
+# Make open ports configurable via the PROXY_PORTS environment variable with default values
+if [ -z "${PROXY_PORTS}" ]; then
+  PROXY_PORTS="80 443 22 61443"
+fi
+export PROXY_PORTS
+
+echo
 echo
 echo "The proxy connection URL is:"
 echo "  $https_proxy"
