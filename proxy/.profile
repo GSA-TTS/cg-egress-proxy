@@ -35,9 +35,10 @@ ntnefina allow.acl
 https_proxy="https://$PROXY_USERNAME:$PROXY_PASSWORD@$(echo "$VCAP_APPLICATION" |  jq .application_uris[0] | sed 's/"//g'):61443"
 export https_proxy
 
-# Make open ports configurable via the PROXY_PORTS environment variable with default values
+# Make open ports configurable via the PROXY_PORTS environment variable.
+# For example "80 443 22 61443". Default to 443 only.
 if [ -z "${PROXY_PORTS}" ]; then
-  PROXY_PORTS="80 443 22 61443"
+  PROXY_PORTS="443"
 fi
 export PROXY_PORTS
 
