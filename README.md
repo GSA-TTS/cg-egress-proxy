@@ -89,6 +89,22 @@ It's better if you use one of these other options:
     export https_proxy="https://user:pass@myproxy.app.internal:61443"
     ```
 
+## Accounting for multiple internal apps that need to talk to one another internally
+
+If you have multiple applications (e.g., an API and a front-end client) that each have a proxy in front of them, you will also need to configure them to explicitly not use the proxy to ensure that container-to-container traffic is permitted via the network policies you have set up.
+
+In addition to the `http_proxy` and `http_proxy` environment variables, you'll also need to set the `no_proxy` environment variable in your app's initialization:
+    ```bash
+    #!/bin/bash
+    export http_proxy="https://user:pass@myproxy.app.internal:61443"
+    export https_proxy="https://user:pass@myproxy.app.internal:61443"
+    export no_proxy="apps.internal"
+    ```
+
+Setting `no_proxy` to `apps.internal` will enable your apps to properly connect to one another within the platform; they'll automatically handle the ports and such.
+
+Please see [this GitLab article for more information about `no_proxy`](https://about.gitlab.com/blog/2021/01/27/we-need-to-talk-no-proxy/) and the state of HTTP proxy configuration in general.
+
 ## Automatically deploying proxies for multiple apps
 
 The `bin/cf-deployproxy` utility is used to automate the process of setting up a proxy for each app that may need one, following some simple conventions. You can specify deny and allow lists tailored for each application. The utility reads a file called `<app>.deny.acl` for denied entries, and a file called `<app>.allow.acl` for allowed entries. The tool will create these files if they don't exist, and is safe to run multiple times. If you have a lot of apps to set up, just run the tool once, and then edit the files that are created and run it again.
