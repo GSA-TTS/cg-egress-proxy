@@ -1,0 +1,5 @@
+# Ignore reason: proxy/caddy is a known artifact
+# sha256sum fa87edd4124b9a2c54bc111dfc64cd07822b104d6d3d2d6fcd9c741d0e2d12b3  proxy/caddy
+# we should find a way to validate this artifact
+ignorePaths:
+- proxy/caddy
