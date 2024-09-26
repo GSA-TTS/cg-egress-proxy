@@ -115,12 +115,15 @@ To learn more about how to use this tool, just run it!
 $ bin/cf-deployproxy -h
 ```
 
-### Proxying S3 Bucket access
+## Proxying S3 Bucket access
 The deployment utility will also automatically ensure that apps can reach the domain corresponding to any S3 bucket services that are bound to them.
 
-*_Note:_* The AWS CLI `aws s3` subcommand cannot be configured with the platform-provided CA bundle, and rejects the certificate presented by the proxy! This means you can't use `aws s3` with the proxy. (We've filed [an upstream issue](https://github.com/aws/aws-cli/issues/6664) to attempt resolve that.)
+To use the AWS CLI `aws s3` subcommand, [set the `AWS_CA_BUNDLE` environment variable to ensure that the cloud.gov platform-provided certificate bundle is used](https://cloud.gov/knowledge-base/2022-11-04-fixing-certificate-errors-aws-egress-proxy/). For example:
+```bash
+AWS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt aws s3 ls [...]
+```
 
-You can still use S3 through the proxy, but since you can't use the AWS CLI, you have to take care of adding the content of the files in `$CF_SYSTEM_CERT_PATH/*` to the CA trust store for your application on your own. We've looked up examples of doing that for [Go](https://forfuncsake.github.io/post/2017/08/trust-extra-ca-cert-in-go-app/), [Python](https://appdividend.com/2020/06/19/python-certifi-example-how-to-use-ssl-certificate-in-python/), [Ruby](https://docs.ruby-lang.org/en/2.4.0/OpenSSL/X509/Store.html), [PHP](https://stackoverflow.com/a/70318246), and [Java](https://stackoverflow.com/a/62508063).
+Similarly, you have to add the content of the files in `$CF_SYSTEM_CERT_PATH/*` to the CA trust store for your application. We've looked up examples of doing that for [Go](https://forfuncsake.github.io/post/2017/08/trust-extra-ca-cert-in-go-app/), [Python](https://appdividend.com/2020/06/19/python-certifi-example-how-to-use-ssl-certificate-in-python/), [Ruby](https://docs.ruby-lang.org/en/2.4.0/OpenSSL/X509/Store.html), [PHP](https://stackoverflow.com/a/70318246), and [Java](https://stackoverflow.com/a/62508063).
 
 ## Troubleshooting
 
