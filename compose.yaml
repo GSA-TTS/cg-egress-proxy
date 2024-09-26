@@ -1,6 +1,3 @@
----
-version: "3.7"
-
 services:
   caddy:
     build:
@@ -22,6 +19,7 @@ services:
       # The variables that matter to the app
       - PROXY_USERNAME=user
       - PROXY_PASSWORD=pass
+      - PROXY_PORTS=443
       - PROXY_DENY="*.yahoo.com"
       - PROXY_ALLOW= |
         "*.google.com

@@ -21,7 +21,6 @@ jobs:
       - name: build caddy - xcaddy build
         run: >
           xcaddy build
-          --with github.com/hairyhenderson/caddy-teapot-module@v0.0.3-0
           --with github.com/caddyserver/forwardproxy@caddy2
           --output proxy/caddy
       - name: validate Caddyfile
