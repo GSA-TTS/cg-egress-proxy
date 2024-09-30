@@ -39,7 +39,7 @@ Deploying this egress proxy in front of your cloud.gov application will help you
             System(https_proxy, "web egress proxy", "proxy for HTTP/S connections")
           }
       }
-      
+
       Boundary(external_boundary, "external boundary") {
         System(external_service, "external service", "service that the application relies on")
       }
@@ -177,6 +177,10 @@ $ cf ssh myapp -t -c "/tmp/lifecycle/launcher /home/vcap/app /bin/bash"
 ```
 
 If that _doesn't_ look OK: You may be using the proxy in a new or unexpected way, or you may have found a bug. Please file an issue or otherwise contact the project's maintainers!
+
+### Language references
+
+Gotchas found in each application language can be found within the [docs](./docs) folder.
 
 ## How it works
 
