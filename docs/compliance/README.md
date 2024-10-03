@@ -23,10 +23,6 @@ from within the `docs/compliance` directory.
 
 Helper scripts to be called from within the `docker-trestle` CLI for transforming the CD into markdown and back again.
 
-#### catalogs
-
-A copy of nist800-53r5 to be referenced by other trestle commands
-
 #### component-definitions
 
 The OSCAL json component definition files to be distributed.

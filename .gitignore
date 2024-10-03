@@ -1,5 +1,5 @@
 .DS_Store
 /todo.txt
 *.acl
-.trestle/cache/
-.trestle/_trash/
+**/.trestle/cache/
+**/.trestle/_trash/

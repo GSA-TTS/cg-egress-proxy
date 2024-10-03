@@ -28,7 +28,7 @@
         "control-implementations": [
           {
             "uuid": "eba1125b-5fd7-46c3-8edc-bf22d67d98cf",
-            "source": "trestle://catalogs/nist800-53r5/catalog.json",
+            "source": "https://raw.githubusercontent.com/usnistgov/oscal-content/refs/tags/v1.3.0/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json",
             "description": "Controls implemented via use of the cg-egress-proxy outbound connection proxy",
             "implemented-requirements": [
               {
