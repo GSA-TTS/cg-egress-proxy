@@ -1,0 +1,49 @@
+name: Validate OSCAL Assembly
+
+on: [pull_request]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate_cd:
+    name: Validate component definition format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Component
+        uses: ./.github/actions/trestle-cmd
+        with:
+          cmd: trestle validate -f component-definitions/cg-egress-proxy/component-definition.json
+
+  check_cd:
+    name: Check assembly is current
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check assembly
+        uses: ./.github/actions/trestle-cmd
+        with:
+          cmd: bin/assemble-cgep-json
+
+      - name: Check no changes exist
+        run: git diff --quiet
+
+      - name: Comment on pull request
+        if: failure()
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const output = `OSCAL assembly detected changes that aren't checked in.
+
+            Run \`bin/assemble-cgep-json\` within trestle to ensure markdown changes are reflected in the CD`;
+
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
