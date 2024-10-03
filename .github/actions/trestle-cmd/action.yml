@@ -13,4 +13,4 @@ runs:
   steps:
     - name: Run cmd
       shell: bash
-      run: docker run -u "$(id -u):$(id -g)" -v $GITHUB_WORKSPACE:/app/docs:rw ghcr.io/gsa-tts/trestle:${{ inputs.tag }} ${{ inputs.cmd }}
+      run: docker run -u "$(id -u):$(id -g)" -v $GITHUB_WORKSPACE/docs/compliance:/app/docs:rw ghcr.io/gsa-tts/trestle:${{ inputs.tag }} ${{ inputs.cmd }}
