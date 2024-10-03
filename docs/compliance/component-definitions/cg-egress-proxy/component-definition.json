@@ -1,0 +1,68 @@
+{
+  "component-definition": {
+    "uuid": "d2f3e1b7-363a-4c8a-afb9-7cee1e825bdc",
+    "metadata": {
+      "title": "cg-egress-proxy Egress Proxy Component Definition.",
+      "last-modified": "2024-10-03T13:28:05.931086+00:00",
+      "version": "0.0.1",
+      "oscal-version": "1.1.2"
+    },
+    "components": [
+      {
+        "uuid": "1acb8ab7-4191-46c6-b79f-659a2f195b5a",
+        "type": "software",
+        "title": "cg-egress-proxy",
+        "description": "The cg-egress-proxy caddy server with forward_proxy configured",
+        "props": [
+          {
+            "name": "Rule_Id",
+            "value": "prod-space-restricted",
+            "remarks": "rule_prod_space_restricted"
+          },
+          {
+            "name": "Rule_Description",
+            "value": "The production space where the system app is running must not have the public-networks-egress ASG applied to it",
+            "remarks": "rule_prod_space_restricted"
+          }
+        ],
+        "control-implementations": [
+          {
+            "uuid": "eba1125b-5fd7-46c3-8edc-bf22d67d98cf",
+            "source": "trestle://catalogs/nist800-53r5/catalog.json",
+            "description": "Controls implemented via use of the cg-egress-proxy outbound connection proxy",
+            "implemented-requirements": [
+              {
+                "uuid": "09de7f16-6339-4daa-b09a-333c5e33185c",
+                "control-id": "sc-7",
+                "description": "",
+                "props": [
+                  {
+                    "name": "implementation-status",
+                    "value": "partial"
+                  }
+                ],
+                "statements": [
+                  {
+                    "statement-id": "sc-7_smt.c",
+                    "uuid": "b56aa629-2452-4052-a5c0-7d245a8122a2",
+                    "description": "eg-egress-proxy provides a control point for allowing network traffic to specific hostnames or IP addresses. Outbound connections are compared to the following list in order:\n\n1. A `deny_file` list of hostnames and/or IP addresses to deny connections to.\n1. An `allow_file` list of hostnames and/or IP addresses to allow connections to.\n1. A `deny all` rule to deny all connections that did not match one of the first two rules.\n\nThe connection is allowed or denied based on the first matching rule.",
+                    "props": [
+                      {
+                        "name": "Rule_Id",
+                        "value": "prod-space-restricted"
+                      },
+                      {
+                        "name": "implementation-status",
+                        "value": "implemented"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

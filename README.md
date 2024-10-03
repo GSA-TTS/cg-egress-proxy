@@ -20,6 +20,7 @@ Creators of of US federal systems are [required](https://csrc.nist.gov/projects/
 
 Deploying this egress proxy in front of your cloud.gov application will help you meet this requirement!
 
+See <docs/compliance/README.md> for information on the OSCAL documentation for this repo.
 <!-- assorted keywords: nist rmf 800-53 fisma fedramp sc-7 gsa boundary egress -->
 </details>
 
