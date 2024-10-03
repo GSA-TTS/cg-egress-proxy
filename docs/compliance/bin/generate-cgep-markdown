@@ -1,0 +1,3 @@
+#! /usr/bin/env bash
+
+trestle author component-generate -n cg-egress-proxy -o control-statements -fo "$@"
