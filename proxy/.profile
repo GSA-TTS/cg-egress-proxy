@@ -32,14 +32,15 @@ ntnefina deny.acl
 ntnefina allow.acl
 
 # Make it easy to run curl tests on ourselves both locally and deployed
+proxy_scheme="http"
 proxy_host="localhost"
-scheme="http"
+proxy_port="8080"
 if [ -n "$VCAP_APPLICATION" ]; then
+  proxy_scheme="https"
   proxy_host=`echo "$VCAP_APPLICATION" | jq -r '.application_uris[0]'`
-  scheme="https"
+  proxy_port="61443"
 fi
-https_proxy="$scheme://$PROXY_USERNAME:$PROXY_PASSWORD@$proxy_host:$PORT"
-export https_proxy
+export https_proxy="$proxy_scheme://$PROXY_USERNAME:$PROXY_PASSWORD@$proxy_host:$proxy_port"
 
 # Make open ports configurable via the PROXY_PORTS environment variable.
 # For example "80 443 22 61443". Default to 443 only.
