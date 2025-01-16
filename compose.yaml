@@ -12,7 +12,6 @@ services:
       # Solution to get Alpine to run the .profile comes from
       # https://stackoverflow.com/a/43743532/17138235
       - ENV=/srv/.profile
-      - https_proxy=https://localhost:8080
       # Provide the CF env fixtures... more are needed!
       - PORT=8080
 
@@ -20,6 +19,5 @@ services:
       - PROXY_USERNAME=user
       - PROXY_PASSWORD=pass
       - PROXY_PORTS=443
-      - PROXY_DENY="*.yahoo.com"
-      - PROXY_ALLOW= |
-        "*.google.com
+      - PROXY_DENY=translate.google.com
+      - PROXY_ALLOW=*.google.com
