@@ -4,6 +4,7 @@
 FROM caddy:2.8-builder AS builder
 
 ARG GOARCH=amd64
+ARG GOOS=linux
 RUN xcaddy build \
     --with github.com/caddyserver/forwardproxy@caddy2
 
