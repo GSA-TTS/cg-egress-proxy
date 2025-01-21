@@ -12,6 +12,10 @@ on:
     # Runs every night around 4:20am EST/1:20am PST
     - cron: "20 8 * * *"
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   keep-binary-up-to-date:
     runs-on: ubuntu-latest
@@ -36,4 +40,5 @@ jobs:
           labels: binary-update, automated-pr
           branch: ${{ steps.vars.outputs.branchname }}
           base: ${{ github.ref_name }}
+          draft: always-true
           sign-commits: true
