@@ -1,0 +1,34 @@
+---
+name: Vulnerability Scan
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+  schedule:
+    - cron: '44 12 * * *'
+
+jobs:
+  scan:
+    name: Run govulncheck on built caddy binary
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: setup go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 'stable'
+      - name: install govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+      - name: run check
+        run: govulncheck -mode binary -format sarif proxy/caddy > caddy-report.sarif
+      - name: upload results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: caddy-report.sarif
