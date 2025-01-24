@@ -1,10 +1,10 @@
 {
   "component-definition": {
-    "uuid": "d2f3e1b7-363a-4c8a-afb9-7cee1e825bdc",
+    "uuid": "21ba99c9-52bb-4bfa-96e3-dafc84c61489",
     "metadata": {
       "title": "cg-egress-proxy Egress Proxy Component Definition.",
-      "last-modified": "2024-10-03T13:28:05.931086+00:00",
-      "version": "0.0.1",
+      "last-modified": "2025-01-24T19:52:58.486096+00:00",
+      "version": "0.0.2",
       "oscal-version": "1.1.2"
     },
     "components": [
@@ -23,6 +23,16 @@
             "name": "Rule_Description",
             "value": "The production space where the system app is running must not have the public-networks-egress ASG applied to it",
             "remarks": "rule_prod_space_restricted"
+          },
+          {
+            "name": "Rule_Id",
+            "value": "cg-egress-proxy-implemented",
+            "remarks": "rule_cgep_implemented"
+          },
+          {
+            "name": "Rule_Description",
+            "value": "This control is fully implemented for the scope of the CG Egress Proxy component",
+            "remarks": "rule_cgep_implemented"
           }
         ],
         "control-implementations": [
@@ -31,6 +41,49 @@
             "source": "https://raw.githubusercontent.com/usnistgov/oscal-content/refs/tags/v1.3.0/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json",
             "description": "Controls implemented via use of the cg-egress-proxy outbound connection proxy",
             "implemented-requirements": [
+              {
+                "uuid": "6cf20413-556a-45e5-ae16-5d9fdbb99c73",
+                "control-id": "ra-5",
+                "description": "",
+                "props": [
+                  {
+                    "name": "implementation-status",
+                    "value": "partial"
+                  }
+                ],
+                "statements": [
+                  {
+                    "statement-id": "ra-5_smt.a",
+                    "uuid": "45f344fa-84ab-48c7-b5de-6c798bb90fc6",
+                    "description": "CG Egress Proxy is scanned via the [govulncheck](https://pkg.go.dev/golang.org/x/vuln/cmd/govulncheck) utility at the following times:\n\n* Every time a new PR is created to update the proxy\n* Every time the `main` branch is pushed to\n* Daily overnight to ensure new vulnerabilities are found even when changes are not made.",
+                    "props": [
+                      {
+                        "name": "Rule_Id",
+                        "value": "cg-egress-proxy-implemented"
+                      },
+                      {
+                        "name": "implementation-status",
+                        "value": "implemented"
+                      }
+                    ]
+                  },
+                  {
+                    "statement-id": "ra-5_smt.f",
+                    "uuid": "a3c84195-d189-4a18-90b4-44b65c88bed0",
+                    "description": "The latest govulncheck library is installed freshly each time the scan is run, thereby updating its knowledge of the most recent vulnerabilities.",
+                    "props": [
+                      {
+                        "name": "Rule_Id",
+                        "value": "cg-egress-proxy-implemented"
+                      },
+                      {
+                        "name": "implementation-status",
+                        "value": "implemented"
+                      }
+                    ]
+                  }
+                ]
+              },
               {
                 "uuid": "09de7f16-6339-4daa-b09a-333c5e33185c",
                 "control-id": "sc-7",
