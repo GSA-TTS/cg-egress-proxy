@@ -27,8 +27,17 @@ jobs:
       - name: install govulncheck
         run: go install golang.org/x/vuln/cmd/govulncheck@latest
       - name: run check
+        continue-on-error: true
+        run: govulncheck -mode binary proxy/caddy
+      - name: run check (sarif)
         run: govulncheck -mode binary -format sarif proxy/caddy > caddy-report.sarif
+      - name: upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: govulncheck-sarif
+          path: caddy-report.sarif
       - name: upload results
+        continue-on-error: true
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: caddy-report.sarif
