@@ -1,0 +1,20 @@
+name: Terraform Test
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Integration test
+    env:
+      TERRAFORM_PRE_RUN: |
+        apt-get update
+        apt-get install -y zip
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: terraform test
+        uses: dflook/terraform-test@v2
