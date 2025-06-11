@@ -9,15 +9,11 @@ services:
     volumes:
       - $PWD/proxy:/etc/caddy
     environment:
-      # Solution to get Alpine to run the .profile comes from
-      # https://stackoverflow.com/a/43743532/17138235
-      - ENV=/srv/.profile
       # Provide the CF env fixtures... more are needed!
       - PORT=8080
 
       # The variables that matter to the app
       - PROXY_USERNAME=user
       - PROXY_PASSWORD=pass
-      - PROXY_PORTS=443
       - PROXY_DENY=translate.google.com
       - PROXY_ALLOW=*.google.com

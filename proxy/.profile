@@ -42,12 +42,6 @@ if [ -n "$VCAP_APPLICATION" ]; then
 fi
 export https_proxy="$proxy_scheme://$PROXY_USERNAME:$PROXY_PASSWORD@$proxy_host:$proxy_port"
 
-# Make open ports configurable via the PROXY_PORTS environment variable.
-# For example "80 443 22 61443". Default to 443 only.
-if [ -z "${PROXY_PORTS}" ]; then
-  export PROXY_PORTS="443"
-fi
-
 echo
 echo
 echo "The proxy connection URL is:"
