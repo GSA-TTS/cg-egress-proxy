@@ -7,5 +7,3 @@ terraform {
     }
   }
 }
-
-provider "cloudfoundry" {}
