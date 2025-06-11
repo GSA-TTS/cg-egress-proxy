@@ -27,7 +27,7 @@ variables {
 
 run "test_proxy_creation" {
   assert {
-    condition     = output.https_proxy == { for name, _ in var.client_configuration : name => "https://${output.username["feedabee"]}:${output.password["feedabee"]}@${output.domain}:61443" }
+    condition     = output.https_proxy == { for name, _ in var.client_configuration : name => "https://${output.username[name]}:${output.password[name]}@${output.domain}:61443" }
     error_message = "HTTPS_PROXY output must match the correct form, got ${nonsensitive(output.https_proxy["feedabee"])}"
   }
 

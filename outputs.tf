@@ -1,10 +1,10 @@
 output "https_proxy" {
-  value     = { for name, creds in local.creds : name => creds.https_proxy }
+  value     = { for name, creds in local.creds : name => creds.https_uri }
   sensitive = true
 }
 
 output "http_proxy" {
-  value     = { for name, creds in local.creds : name => creds.http_proxy }
+  value     = { for name, creds in local.creds : name => creds.http_uri }
   sensitive = true
 }
 
@@ -13,11 +13,11 @@ output "domain" {
 }
 
 output "http_port" {
-  value = local.http_port
+  value = local.common_json.http_port
 }
 
 output "https_port" {
-  value = local.https_port
+  value = local.common_json.https_port
 }
 
 output "username" {
@@ -34,11 +34,6 @@ output "app_id" {
 }
 
 output "json_credentials" {
-  value = jsonencode({
-    "credentials" = local.creds
-    "domain"      = local.domain
-    "https_port"  = local.https_port
-    "http_port"   = local.http_port
-  })
+  value     = length(local.configuration) == 1 ? local.single_client_json : local.multi_client_json
   sensitive = true
 }

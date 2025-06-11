@@ -63,13 +63,18 @@ resource "cloudfoundry_route" "egress_route" {
 }
 
 locals {
+  domain = cloudfoundry_route.egress_route.url
   creds = { for name, config in local.configuration : name => {
-    https_proxy = "https://${config.user_name}:${random_password.password[name].result}@${local.domain}:61443"
-    http_proxy  = "http://${config.user_name}:${random_password.password[name].result}@${local.domain}:8080"
-    username    = config.user_name
-    password    = random_password.password[name].result
+    https_uri = "https://${config.user_name}:${random_password.password[name].result}@${local.domain}:61443"
+    http_uri  = "http://${config.user_name}:${random_password.password[name].result}@${local.domain}:8080"
+    username  = config.user_name
+    password  = random_password.password[name].result
   } }
-  domain     = cloudfoundry_route.egress_route.url
-  https_port = 61443
-  http_port  = 8080
+  common_json = {
+    domain     = local.domain
+    https_port = 61443
+    http_port  = 8080
+  }
+  single_client_json = jsonencode(merge(local.common_json, values(local.creds)[0]))
+  multi_client_json  = jsonencode(merge(local.common_json, { credentials = local.creds }))
 }
