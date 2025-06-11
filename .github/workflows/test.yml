@@ -27,7 +27,7 @@ jobs:
       - name: build caddy - xcaddy build
         run: >
           xcaddy build
-          --with github.com/caddyserver/forwardproxy@caddy2
+          --with github.com/caddyserver/forwardproxy
           --output proxy/caddy
       - name: validate Caddyfile
         run: make validate
