@@ -10,6 +10,12 @@ resource "random_password" "password" {
   special  = false
 }
 
+resource "random_uuid" "random_username" {}
+resource "random_password" "random_password" {
+  length  = 16
+  special = false
+}
+
 data "archive_file" "src" {
   type        = "zip"
   source_dir  = "${path.module}/proxy"
@@ -41,7 +47,9 @@ resource "cloudfoundry_app" "egress_app" {
 
   environment = merge(
     {
-      CADDY_LOG_LEVEL = "INFO"
+      CADDY_LOG_LEVEL       = "INFO"
+      PROXY_RANDOM_USERNAME = random_uuid.random_username.result
+      PROXY_RANDOM_PASSWORD = random_password.random_password.result
       CONFIG_CONTENT = templatefile("${path.module}/Caddyfile.tftpl", {
         configuration = values(local.configuration)
       })

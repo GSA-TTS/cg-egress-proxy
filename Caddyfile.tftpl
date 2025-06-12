@@ -8,18 +8,26 @@
 }
 
 :{$PORT} {
+	route {
 %{ for config in configuration ~}
-	forward_proxy {
-		basic_auth "${config.user_name}" {$PROXY_PASSWORD_${config.safe_name}}
-		probe_resistance
-		acl {
-			%{ if length(config.denylist) > 0 }deny ${join(" ", config.denylist)}%{ endif }
-			%{ if length(config.allowlist) > 0 }allow ${join(" ", config.allowlist)}%{ endif }
-			deny all
+		forward_proxy {
+			basic_auth "${config.user_name}" {$PROXY_PASSWORD_${config.safe_name}}
+			probe_resistance
+			acl {
+				%{ if length(config.denylist) > 0 }deny ${join(" ", config.denylist)}%{ endif }
+				%{ if length(config.allowlist) > 0 }allow ${join(" ", config.allowlist)}%{ endif }
+				deny all
+			}
+			ports ${join(" ", config.ports)}
 		}
-		ports ${join(" ", config.ports)}
-	}
 %{ endfor ~}
+		forward_proxy {
+			basic_auth {$PROXY_RANDOM_USERNAME} {$PROXY_RANDOM_PASSWORD}
+			acl {
+				deny all
+			}
+		}
+	}
 	log {
 		format json
 		level {$CADDY_LOG_LEVEL:INFO}
