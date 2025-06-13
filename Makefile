@@ -10,7 +10,7 @@ caddy-v2-with-forwardproxy: Dockerfile proxy/Caddyfile
 validate:
 	echo "test.gov" > allow.acl
 	echo "test.com" > deny.acl
-	PORT=9999 PROXY_USERNAME=admin PROXY_PASSWORD=pass PROXY_PORTS=443 ./proxy/caddy validate --config proxy/Caddyfile
+	PORT=9999 PROXY_USERNAME=admin PROXY_PASSWORD=pass ./proxy/caddy validate --config proxy/Caddyfile
 	rm allow.acl deny.acl
 
 build-caddy-apple-silicon: export GOOS=darwin

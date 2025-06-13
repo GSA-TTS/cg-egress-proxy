@@ -1,0 +1,40 @@
+{
+	debug
+	log {
+		format console
+		level {$CADDY_LOG_LEVEL:INFO}
+	}
+	auto_https off
+}
+
+:{$PORT} {
+	route {
+%{ for config in configuration ~}
+		forward_proxy {
+			basic_auth {$PROXY_USERNAME_${config.safe_name}} {$PROXY_PASSWORD_${config.safe_name}}
+			probe_resistance
+			acl {
+				%{ if length(config.denylist) > 0 }deny ${join(" ", config.denylist)}%{ endif }
+				%{ if length(config.allowlist) > 0 }allow ${join(" ", config.allowlist)}%{ endif }
+				deny all
+			}
+			ports ${join(" ", config.ports)}
+		}
+%{ endfor ~}
+		forward_proxy {
+			# This last module serves to return a `407 Proxy Authentication Required` response
+			# to any clients that didn't send auth details originally. It is expected that no client
+			# is given the PROXY_RANDOM_USERNAME:PROXY_RANDOM_PASSWORD credentials
+			basic_auth {$PROXY_RANDOM_USERNAME} {$PROXY_RANDOM_PASSWORD}
+			acl {
+				# just in case the random creds do get out, don't allow any traffic via them
+				deny all
+			}
+		}
+	}
+	log {
+		format json
+		level {$CADDY_LOG_LEVEL:INFO}
+		output stdout
+	}
+}

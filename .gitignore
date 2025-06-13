@@ -3,3 +3,6 @@
 *.acl
 **/.trestle/cache/
 **/.trestle/_trash/
+dist/
+.terraform*
+*.tfstate*

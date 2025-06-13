@@ -6,27 +6,25 @@
 	debug
 	log {
 		format console
-		level INFO
+		level {$CADDY_LOG_LEVEL:INFO}
 	}
 	auto_https off
 }
 
 :{$PORT} {
-	route {
-		forward_proxy {
-			basic_auth {$PROXY_USERNAME} {$PROXY_PASSWORD}
-			acl {
-				deny_file deny.acl
-				allow_file allow.acl
-				deny all
-			}
-			ports {$PROXY_PORTS}
-			serve_pac
+	forward_proxy {
+		basic_auth {$PROXY_USERNAME} {$PROXY_PASSWORD}
+		probe_resistance
+		acl {
+			deny_file deny.acl
+			allow_file allow.acl
+			deny all
 		}
+		ports {$PROXY_PORTS:443}
 	}
 	log {
 		format json
-		level INFO
+		level {$CADDY_LOG_LEVEL:INFO}
 		output stdout
 	}
 }
