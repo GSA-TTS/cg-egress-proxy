@@ -22,8 +22,12 @@
 		}
 %{ endfor ~}
 		forward_proxy {
+			# This last module serves to return a `407 Proxy Authentication Required` response
+			# to any clients that didn't send auth details originally. It is expected that no client
+			# is given the PROXY_RANDOM_USERNAME:PROXY_RANDOM_PASSWORD credentials
 			basic_auth {$PROXY_RANDOM_USERNAME} {$PROXY_RANDOM_PASSWORD}
 			acl {
+				# just in case the random creds do get out, don't allow any traffic via them
 				deny all
 			}
 		}
