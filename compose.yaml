@@ -17,3 +17,7 @@ services:
       - PROXY_PASSWORD=pass
       - PROXY_DENY=translate.google.com
       - PROXY_ALLOW=*.google.com
+
+      # test export_http_proxy.sh
+      - PROXY_USERNAME_client=clientuser
+      - PROXY_PASSWORD_client=clientpass

@@ -14,6 +14,7 @@ RUN apk add --no-cache jq curl
 
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
 COPY Caddyfile /etc/caddy/Caddyfile
+COPY export_http_proxy.sh /srv/
 COPY .profile /srv/.profile
 COPY --chmod=0755 docker-entrypoint.sh /usr/bin/docker-entrypoint.sh
 

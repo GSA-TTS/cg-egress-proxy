@@ -48,6 +48,10 @@ resource "cloudfoundry_app" "egress_app" {
   strategy         = "rolling"
   enable_ssh       = var.enable_ssh
 
+  routes = [{
+    route = cloudfoundry_route.egress_route.url
+  }]
+
   environment = merge(
     {
       CADDY_LOG_LEVEL       = "INFO"
@@ -68,9 +72,6 @@ resource "cloudfoundry_route" "egress_route" {
   domain = data.cloudfoundry_domain.internal_domain.id
   space  = var.cf_egress_space.id
   host   = local.egress_host
-  destinations = [{
-    app_id = cloudfoundry_app.egress_app.id
-  }]
 }
 
 locals {
