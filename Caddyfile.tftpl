@@ -11,7 +11,7 @@
 	route {
 %{ for config in configuration ~}
 		forward_proxy {
-			basic_auth "${config.user_name}" {$PROXY_PASSWORD_${config.safe_name}}
+			basic_auth {$PROXY_USERNAME_${config.safe_name}} {$PROXY_PASSWORD_${config.safe_name}}
 			probe_resistance
 			acl {
 				%{ if length(config.denylist) > 0 }deny ${join(" ", config.denylist)}%{ endif }

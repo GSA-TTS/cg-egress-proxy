@@ -4,7 +4,7 @@ locals {
   egress_host        = replace(lower(substr(coalesce(var.route_host, local.default_route_host), -63, -1)), "/^[^a-z]*/", "")
 }
 
-resource "random_password" "password" {
+resource "random_password" "client_password" {
   for_each = var.client_configuration
   length   = 16
   special  = false
@@ -28,7 +28,10 @@ locals {
     safe_name = replace(lower(name), "/[^a-z0-9_]+/", "_")
     user_name = replace(name, ":", "")
   }) }
-  environment_passwords = { for name, config in local.configuration : "PROXY_PASSWORD_${config.safe_name}" => random_password.password[name].result }
+  environment_credentials = [for name, config in local.configuration : {
+    "PROXY_USERNAME_${config.safe_name}" = config.user_name
+    "PROXY_PASSWORD_${config.safe_name}" = random_password.client_password[name].result
+  }]
 }
 
 resource "cloudfoundry_app" "egress_app" {
@@ -54,7 +57,7 @@ resource "cloudfoundry_app" "egress_app" {
         configuration = values(local.configuration)
       })
     },
-    local.environment_passwords
+    local.environment_credentials...
   )
 }
 
@@ -73,10 +76,10 @@ resource "cloudfoundry_route" "egress_route" {
 locals {
   domain = cloudfoundry_route.egress_route.url
   creds = { for name, config in local.configuration : name => {
-    https_uri = "https://${config.user_name}:${random_password.password[name].result}@${local.domain}:61443"
-    http_uri  = "http://${config.user_name}:${random_password.password[name].result}@${local.domain}:8080"
+    https_uri = "https://${config.user_name}:${random_password.client_password[name].result}@${local.domain}:61443"
+    http_uri  = "http://${config.user_name}:${random_password.client_password[name].result}@${local.domain}:8080"
     username  = config.user_name
-    password  = random_password.password[name].result
+    password  = random_password.client_password[name].result
   } }
   common_json = {
     domain     = local.domain
