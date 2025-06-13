@@ -42,7 +42,7 @@ run "test_proxy_creation" {
   }
 
   assert {
-    condition     = output.password == { for name, _ in var.client_configuration : name => random_password.password[name].result }
+    condition     = output.password == { for name, _ in var.client_configuration : name => random_password.client_password[name].result }
     error_message = "Output password must come from the random_password resource"
   }
 
