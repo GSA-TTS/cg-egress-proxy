@@ -32,11 +32,11 @@ See <docs/compliance/README.md> for information on the OSCAL documentation for t
     C4Context
       title controlled egress proxy for Cloud Foundry spaces
       Boundary(system, "system boundary") {
-          Boundary(trusted_local_egress, "egress-controlled space", "trusted-local-egress ASG") {
+          Boundary(trusted_local_egress, "egress-controlled space", "trusted_local_networks_egress ASG") {
             System(application, "Application", "main application logic")
           }
 
-          Boundary(public_egress, "egress-permitted space", "public-egress ASG") {
+          Boundary(public_egress, "egress-permitted space", "public_networks_egress ASG") {
             System(https_proxy, "web egress proxy", "proxy for HTTP/S connections")
           }
       }
@@ -49,7 +49,67 @@ See <docs/compliance/README.md> for information on the OSCAL documentation for t
       Rel(https_proxy, external_service, "proxies request", "HTTP/S")
 ```
 
-## Deploying the proxy by hand
+## Deployment options
+
+### Terraform module (preferred)
+
+Creates and configures an instance of cg-egress-proxy to proxy traffic from your apps. Each `client_configuration` has a separate set of credentials that's returned
+
+Prerequite: an existing public-egress space to deploy the proxy into.
+
+```terraform
+module "egress_proxy" {
+  source = "github.com/GSA-TTS/cg-egress-proxy?ref=GIT_SHA"
+
+  cf_org_name          = local.cf_org_name
+  cf_egress_space      = data.cloudfoundry_space.egress_space
+  name                 = "egress-proxy"
+  client_configuration = {
+    "client-name" = {
+      ports     = [443]
+      allowlist = ["list.of.hosts.to", "*.allow.access"]
+      denylist  = ["deny.allow.access"]
+    }
+  }
+  # see variables.tf for full list of optional arguments
+}
+
+# connect the egress proxy to your app:
+
+# setup routing from the client-name app:
+resource "cloudfoundry_network_policy" "egress_routing" {
+  policies = [
+    {
+      source_app      = cloudfoundry_app.client-name.id
+      destination_app = module.egress_proxy.app_id
+      port            = "61443"
+    }
+  ]
+}
+
+# create a user-provided service instance to store credentials in app's space
+# you must also bind this service_instance to your app
+resource "cloudfoundry_service_instance" "egress-credentials" {
+  name        = "egress-credentials"
+  space       = data.cloudfoundry_space.app_space.id
+  type        = "user-provided"
+  credentials = module.egress_proxy.json_credentials
+  # see outputs.tf for the full list of outputs returned to the calling module,
+  # especially in cases with multiple client_configuration entries
+}
+```
+
+### `bin/cf-deployproxy`
+
+The deploy script in `bin` will deploy a separate instance of the cg-egress-proxy for each application that requires egress. This method is only recommended for applications that are not managed with IaC.
+
+Run `bin/cf-deployproxy -h` for usage instructions
+
+### `terraform-cloudgov` Terraform module (deprecated)
+
+See the [terraform-cloudgov README](https://github.com/GSA-TTS/terraform-cloudgov?tab=readme-ov-file#egress_proxy) for usage instructions. This method is deprecated in favor of the terraform module in this repository.
+
+### Deploying the proxy by hand (not recommended for production use)
 
 Copy and edit the vars.yml-sample settings file. (Convention is to name it after your app.)
 
@@ -74,20 +134,21 @@ cf target -s prod [-o yourorg]
 cf add-network-policy app myproxy --protocol tcp --port 61443 -s prod-egress [-o otherorg]
 ```
 
-Help your app find the the proxy.
+Help your app find the the proxy:
 
-    $ cf set-env http_proxy  'https://user:pass@myproxy.app.internal:61443'
-    $ cf set-env https_proxy 'https://user:pass@myproxy.app.internal:61443'
+1. Set an environment variable with the proxy details:
 
-Note that setting the environment variables this way is only for convenience. You may see credentials appear in log or `cf env` output, for example.
+        $ cf set-env egress_proxy  'https://user:pass@myproxy.app.internal:61443'
 
-It's better if you use one of these other options:
-1. Use a [user-provided service](https://docs.cloudfoundry.org/devguide/services/user-provided.html) to provide the URLs to your app.
-2. Use the [`.profile`](https://docs.cloudfoundry.org/devguide/deploy-apps/deploy-app.html#profile) to set these variables during your app's initialization.
+2. Or use a [user-provided service](https://docs.cloudfoundry.org/devguide/services/user-provided.html) to provide the URLs to your app.
+
+Set up a [`.profile` file](https://docs.cloudfoundry.org/devguide/deploy-apps/deploy-app.html#profile) to set these variables during your app's initialization from either `$egress_proxy` or the user-provided service.
+
     ```bash
     #!/bin/bash
-    export http_proxy="https://user:pass@myproxy.app.internal:61443"
-    export https_proxy="https://user:pass@myproxy.app.internal:61443"
+    # for example, from $egress_proxy
+    export http_proxy="$egress_proxy"
+    export https_proxy="$egress_proxy"
     ```
 
 ## Accounting for multiple internal apps that need to talk to one another internally
@@ -106,16 +167,6 @@ Setting `no_proxy` to `apps.internal` will enable your apps to properly connect 
 
 Please see [this GitLab article for more information about `no_proxy`](https://about.gitlab.com/blog/2021/01/27/we-need-to-talk-no-proxy/) and the state of HTTP proxy configuration in general.
 
-## Automatically deploying proxies for multiple apps
-
-The `bin/cf-deployproxy` utility is used to automate the process of setting up a proxy for each app that may need one, following some simple conventions. You can specify deny and allow lists tailored for each application. The utility reads a file called `<app>.deny.acl` for denied entries, and a file called `<app>.allow.acl` for allowed entries. The tool will create these files if they don't exist, and is safe to run multiple times. If you have a lot of apps to set up, just run the tool once, and then edit the files that are created and run it again.
-
-To learn more about how to use this tool, just run it!
-
-```bash
-$ bin/cf-deployproxy -h
-```
-
 ## Proxying S3 Bucket access
 The deployment utility will also automatically ensure that apps can reach the domain corresponding to any S3 bucket services that are bound to them.
 
@@ -132,7 +183,10 @@ Test that curl connects properly from your application's container.
 
 ```bash
 # Get a shell inside the app
-$ cf ssh app -t -c "/tmp/lifecycle/launcher /home/vcap/app /bin/bash"
+$ cf ssh app -t -c "/tmp/lifecycle/launcher /home/vcap/app /bin/bash {}"
+
+# Set http(s)_proxy env variables
+$ . export_http_proxy.sh [CLIENT_NAME]
 
 # Use curl to test that the container can reach things it should
 $ curl http://allowedhost:allowedport
@@ -161,7 +215,7 @@ If not, then it's time to see if connections are properly allowed/denied from th
 
 ```bash
 # Set up the exact same environment used by the proxy
-$ cf ssh myapp -t -c "/tmp/lifecycle/launcher /home/vcap/app /bin/bash"
+$ cf ssh myapp -t -c "/tmp/lifecycle/launcher /home/vcap/app /bin/bash {}"
 
   # Within the resulting shell...
   $ curl https://allowedhost
@@ -186,9 +240,9 @@ Gotchas found in each application language can be found within the [docs](./docs
 ## How it works
 
 - The proxy runs [Caddy V2](https://caddyserver.com)
-  - Caddy is compiled to include the [forwardproxy](https://github.com/caddyserver/forwardproxy/tree/caddy2) plugin
-  - `.profile` creates `deny.acl` and `allow.acl` files based on environment variables.
-  - Caddy's `forward_proxy` directive refers to those files with `deny_file` and `allow_file`.
+  - Caddy is compiled to include the [forwardproxy](https://github.com/caddyserver/forwardproxy) plugin
+  - `.profile` copies the config from `$CONFIG_CONTENT` _or_ creates `deny.acl` and `allow.acl` files based on environment variables.
+  - Caddy's `forward_proxy` directive refers to those rules with `allow`, `deny`, `deny_file`, and `allow_file`.
 - Caddy listens on one port: $PORT
   - Caddy is configured to use the c2c certificate for terminating TLS.
   - After TLS termination, Caddy sees plaintext for the _inital_ client connection, until it receives `CONNECT`. After that exchange, per the proxying spec:
@@ -223,23 +277,7 @@ $ make
 ### If you want to hand test using your browser...
 _NOTE: This information is out of date, and needs updating... PRs welcome!_
 
-Caddy is configured to listen on port 8080, using certificates signed with its own root CA. This means you WILL see cert errors if you set `https_proxy=https://localhost:443` as the proxy for your local client. To avoid that, you can add Caddy's internal root CA certificate to the CA bundle for either your client, or your OS. However, be prepared for the fact that this certificate changes every time you `docker compose up`!
-
-The root CA certificate is in the Caddy container at `/data/caddy/pki/authorities/local/root.crt`. Grab it by running
-```bash
-docker compose cp caddy:/data/caddy/pki/authorities/local/root.crt .`
-```
-
-Add the root CA certificate for your client (TODO: Finish researching and add all the links):
-- windows (system wide):
-- linux (system wide):
-- mac (system wide):
-- Firefox:
-- Chrome:
-- IE9+:
-- curl: Set flag `--proxy-cacert filename`
-
-_Note:_ We may be able to [eliminate the hurdles of testing with TLS locally](https://github.com/caddyserver/caddy/issues/3021) in the future.
+Caddy is configured to listen on port 8080 and does not attempt tls. This means you must set `https_proxy` to a value that starts with `http://`.
 
 ## Contributing
 
