@@ -99,6 +99,8 @@ resource "cloudfoundry_service_instance" "egress-credentials" {
 }
 ```
 
+There is an example of deploying the proxy for a [two-client config](https://github.com/GSA-TTS/gitlab-runner-cloudgov/blob/09bb1b95f3a92687caccba4fdea82754228c0d64/main.tf#L162-L227) in the gitlab-runner-cloudgov repo. This example includes deploying the proxy, setting up network policies, and storing the proxy credentials in user-provided service instances.
+
 ### `bin/cf-deployproxy`
 
 The deploy script in `bin` will deploy a separate instance of the cg-egress-proxy for each application that requires egress. This method is only recommended for applications that are not managed with IaC.
