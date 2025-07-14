@@ -72,6 +72,10 @@ resource "cloudfoundry_route" "egress_route" {
   domain = data.cloudfoundry_domain.internal_domain.id
   space  = var.cf_egress_space.id
   host   = local.egress_host
+
+  lifecycle {
+    ignore_changes = [domain]
+  }
 }
 
 locals {
