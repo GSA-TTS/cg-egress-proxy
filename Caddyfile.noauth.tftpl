@@ -1,0 +1,28 @@
+{
+	debug
+	log {
+		format console
+		level {$CADDY_LOG_LEVEL:INFO}
+	}
+	auto_https off
+}
+
+:{$PORT} {
+	route {
+%{ for config in configuration ~}
+		forward_proxy {
+			acl {
+				%{ if length(config.denylist) > 0 }deny ${join(" ", config.denylist)}%{ endif }
+				%{ if length(config.allowlist) > 0 }allow ${join(" ", config.allowlist)}%{ endif }
+				deny all
+			}
+			ports ${join(" ", config.ports)}
+		}
+%{ endfor ~}
+	}
+	log {
+		format json
+		level {$CADDY_LOG_LEVEL:INFO}
+		output stdout
+	}
+}

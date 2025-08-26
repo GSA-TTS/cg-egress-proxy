@@ -31,12 +31,23 @@ variable "client_configuration" {
     ports     = optional(set(number), [443])
   }))
   description = "Configuration map {client_name => config}"
+
+  validation {
+    condition     = length(var.client_configuration) == 1 || var.authentication
+    error_message = "client_configuration only supports one entry when authentication is off"
+  }
 }
 
 variable "enable_ssh" {
   type        = bool
   default     = false
   description = "Whether to allow ssh into the egress app"
+}
+
+variable "authentication" {
+  type        = bool
+  default     = true
+  description = "Set to false to allow connections without proxy auth"
 }
 
 variable "egress_memory" {

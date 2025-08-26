@@ -32,6 +32,7 @@ locals {
     "PROXY_USERNAME_${config.safe_name}" = config.user_name
     "PROXY_PASSWORD_${config.safe_name}" = random_password.client_password[name].result
   }]
+  caddyfile_tmpl = var.authentication ? "Caddyfile.auth.tftpl" : "Caddyfile.noauth.tftpl"
 }
 
 resource "cloudfoundry_app" "egress_app" {
@@ -57,7 +58,7 @@ resource "cloudfoundry_app" "egress_app" {
       CADDY_LOG_LEVEL       = "INFO"
       PROXY_RANDOM_USERNAME = random_uuid.random_username.result
       PROXY_RANDOM_PASSWORD = random_password.random_password.result
-      CONFIG_CONTENT = templatefile("${path.module}/Caddyfile.tftpl", {
+      CONFIG_CONTENT = templatefile("${path.module}/${local.caddyfile_tmpl}", {
         configuration = values(local.configuration)
       })
     },
@@ -81,10 +82,10 @@ resource "cloudfoundry_route" "egress_route" {
 locals {
   domain = cloudfoundry_route.egress_route.url
   creds = { for name, config in local.configuration : name => {
-    https_uri = "https://${config.user_name}:${random_password.client_password[name].result}@${local.domain}:61443"
-    http_uri  = "http://${config.user_name}:${random_password.client_password[name].result}@${local.domain}:8080"
-    username  = config.user_name
-    password  = random_password.client_password[name].result
+    https_uri = var.authentication ? "https://${config.user_name}:${random_password.client_password[name].result}@${local.domain}:61443" : "https://${local.domain}:61443"
+    http_uri  = var.authentication ? "http://${config.user_name}:${random_password.client_password[name].result}@${local.domain}:8080" : "http://${local.domain}:8080"
+    username  = var.authentication ? config.user_name : ""
+    password  = var.authentication ? random_password.client_password[name].result : ""
   } }
   common_json = {
     domain     = local.domain
