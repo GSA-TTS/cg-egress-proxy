@@ -20,7 +20,6 @@ data "archive_file" "src" {
   type        = "zip"
   source_dir  = "${path.module}/proxy"
   output_path = "${path.module}/dist/src.zip"
-  excludes    = ["docker-entrypoint.sh"]
 }
 
 locals {
@@ -42,7 +41,7 @@ resource "cloudfoundry_app" "egress_app" {
   path             = data.archive_file.src.output_path
   source_code_hash = data.archive_file.src.output_base64sha256
   buildpacks       = ["binary_buildpack"]
-  command          = "./caddy run --config Caddyfile"
+  command          = "./run.sh ./caddy run --config Caddyfile"
   memory           = var.egress_memory
   instances        = var.instances
   strategy         = "rolling"

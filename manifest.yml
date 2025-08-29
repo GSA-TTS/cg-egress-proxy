@@ -11,7 +11,7 @@ applications:
     health-check-type: process
     instances: 2
     memory: 64M
-    command: ./caddy run --config Caddyfile
+    command: ./run.sh ./caddy run --config Caddyfile
     env:
       PROXY_USERNAME: ((username))
       PROXY_PASSWORD: ((password))

@@ -15,10 +15,9 @@ RUN apk add --no-cache jq curl
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
 COPY Caddyfile /etc/caddy/Caddyfile
 COPY export_http_proxy.sh /srv/
-COPY .profile /srv/.profile
-COPY --chmod=0755 docker-entrypoint.sh /usr/bin/docker-entrypoint.sh
+COPY run.sh /srv/
 
 EXPOSE 8080
 
-ENTRYPOINT [ "/usr/bin/docker-entrypoint.sh" ]
+ENTRYPOINT [ "/srv/run.sh" ]
 CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--watch"]

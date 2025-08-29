@@ -34,3 +34,5 @@ else
   ntnefina deny.acl
   ntnefina allow.acl
 fi
+
+exec "$@"
