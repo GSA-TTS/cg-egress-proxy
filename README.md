@@ -167,6 +167,8 @@ In addition to the `http_proxy` and `http_proxy` environment variables, you'll a
 
 Setting `no_proxy` to `apps.internal` will enable your apps to properly connect to one another within the platform; they'll automatically handle the ports and such.
 
+You may also need to configure your apps to trust the system CA certs. (A typical error message you might see in this case: "SSL handshake failed: unable to find valid certification path to requested target.") This typically means setting an env variable with a path to the system certs. Depending on the base image or Cloud Foundry stack, the system CA bundle may be located at different paths, e.g., /etc/ssl/certs/ca-certificates.crt (Debian/Ubuntu-based images) or /etc/ssl/certs/ca-bundle.crt (RHEL/CentOS/Amazon Linux-based images).
+
 Please see [this GitLab article for more information about `no_proxy`](https://about.gitlab.com/blog/2021/01/27/we-need-to-talk-no-proxy/) and the state of HTTP proxy configuration in general.
 
 ## Proxying S3 Bucket access
