@@ -33,6 +33,15 @@ locals {
   }]
 }
 
+# create a useless service to bind to the app to get around issue in provider 1.8.0 and 1.9.0 (at least)
+# https://github.com/cloudfoundry/terraform-provider-cloudfoundry/issues/307
+resource "cloudfoundry_service_instance" "binding_workaround" {
+  name        = "service-binding-workaround"
+  space       = var.cf_egress_space.id
+  type        = "user-provided"
+  credentials = jsonencode({})
+}
+
 resource "cloudfoundry_app" "egress_app" {
   name       = var.name
   space_name = var.cf_egress_space.name
@@ -49,6 +58,10 @@ resource "cloudfoundry_app" "egress_app" {
 
   routes = [{
     route = cloudfoundry_route.egress_route.url
+  }]
+
+  service_bindings = [{
+    service_instance = cloudfoundry_service_instance.binding_workaround.name
   }]
 
   environment = merge(
