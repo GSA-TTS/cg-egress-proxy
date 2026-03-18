@@ -59,7 +59,7 @@ Prerequite: an existing public-egress space to deploy the proxy into.
 
 ```terraform
 module "egress_proxy" {
-  source = "github.com/GSA-TTS/cg-egress-proxy?ref=GIT_SHA"
+  source = "github.com/GSA-TTS/cg-egress-proxy?ref=<TAG-OR-SHA>"
 
   cf_org_name          = local.cf_org_name
   cf_egress_space      = data.cloudfoundry_space.egress_space
