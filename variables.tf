@@ -50,3 +50,9 @@ variable "instances" {
   default     = 2
   description = "the number of instances of the HTTPS proxy application to run (default: 2)"
 }
+
+variable "credential_version" {
+  type        = string
+  default     = "1"
+  description = "Version string to trigger credential rotation when changed"
+}

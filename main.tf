@@ -4,16 +4,28 @@ locals {
   egress_host        = replace(lower(substr(coalesce(var.route_host, local.default_route_host), -63, -1)), "/^[^a-z]*/", "")
 }
 
+resource "terraform_data" "credential_key" {
+  input = var.credential_version
+}
+
 resource "random_password" "client_password" {
   for_each = var.client_configuration
   length   = 16
   special  = false
+
+  lifecycle {
+    replace_triggered_by = [terraform_data.credential_key]
+  }
 }
 
 resource "random_uuid" "random_username" {}
 resource "random_password" "random_password" {
   length  = 16
   special = false
+
+  lifecycle {
+    replace_triggered_by = [terraform_data.credential_key]
+  }
 }
 
 data "archive_file" "src" {
