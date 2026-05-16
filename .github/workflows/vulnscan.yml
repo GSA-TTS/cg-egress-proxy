@@ -13,6 +13,10 @@ on:
   schedule:
     - cron: '44 12 * * *'
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   scan:
     name: Run govulncheck on built caddy binary
