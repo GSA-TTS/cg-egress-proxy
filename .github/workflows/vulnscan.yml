@@ -49,8 +49,8 @@ jobs:
         run: |
           jq '
             (.runs[]?.results[]? |= (
-              if (.locations|not) and (.codeFlows[0].threadFlows[0].locations[0]) then
-                .locations = [ .codeFlows[0].threadFlows[0].locations[0] ]
+              if (.locations|not) and (.codeFlows[0].threadFlows[0].locations[0].location) then
+                .locations = [ .codeFlows[0].threadFlows[0].locations[0].location ]
               else . end
             ))
             ' caddy-report.sarif > caddy-report-patched.sarif
