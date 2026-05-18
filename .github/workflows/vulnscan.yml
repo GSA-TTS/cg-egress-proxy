@@ -64,6 +64,7 @@ jobs:
                   .locations = [{"physicalLocation": {"artifactLocation": {"uri": "UNKNOWN"}}}]
                 end
               else . end
+              | (.locations[]?.physicalLocation.artifactLocation.uri |= (if . == null or . == "" then "UNKNOWN" else . end))
               | (if .stacks then .stacks |= unique else . end)
               | (if .codeFlows then .codeFlows[]?.threadFlows |= unique else . end)
             ))
