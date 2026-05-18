@@ -55,6 +55,16 @@ jobs:
             ))
             ' caddy-report.sarif > caddy-report-patched.sarif
           mv caddy-report-patched.sarif caddy-report.sarif
+      - name: deduplicate sarif (final)
+        run: |
+          jq '
+            (.runs[]?.tool.driver.rules[]?.properties.tags) |= unique
+            | (.runs[]?.results[]? |= (
+              (if .stacks then .stacks |= unique else . end)
+              | (if .codeFlows then .codeFlows[]?.threadFlows |= unique else . end)
+            ))
+          ' caddy-report.sarif > caddy-report-dedup.sarif
+          mv caddy-report-dedup.sarif caddy-report.sarif
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
