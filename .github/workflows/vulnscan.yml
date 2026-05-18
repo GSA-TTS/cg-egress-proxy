@@ -13,6 +13,10 @@ on:
   schedule:
     - cron: '44 12 * * *'
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   scan:
     name: Run govulncheck on built caddy binary
@@ -31,6 +35,14 @@ jobs:
         run: govulncheck -mode binary proxy/caddy
       - name: run check (sarif)
         run: govulncheck -mode binary -format sarif proxy/caddy > caddy-report.sarif
+      - name: deduplicate sarif stacks
+        run: |
+          jq '
+            .runs[]?.results[]? |= (
+              if .stacks then .stacks |= unique else . end
+            )
+          ' caddy-report.sarif > caddy-report-dedup.sarif
+          mv caddy-report-dedup.sarif caddy-report.sarif
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -38,6 +50,6 @@ jobs:
           path: caddy-report.sarif
       - name: upload results
         continue-on-error: true
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: caddy-report.sarif
