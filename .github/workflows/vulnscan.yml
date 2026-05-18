@@ -35,12 +35,14 @@ jobs:
         run: govulncheck -mode binary proxy/caddy
       - name: run check (sarif)
         run: govulncheck -mode binary -format sarif proxy/caddy > caddy-report.sarif
-      - name: deduplicate sarif stacks
+      - name: deduplicate sarif
         run: |
           jq '
-            .runs[]?.results[]? |= (
-              if .stacks then .stacks |= unique else . end
-            )
+            (.runs[]?.tool.driver.rules[]?.properties.tags) |= unique
+            | (.runs[]?.results[]? |= (
+              (if .stacks then .stacks |= unique else . end)
+              | (if .codeFlows then .codeFlows[]?.threadFlows |= unique else . end)
+            ))
           ' caddy-report.sarif > caddy-report-dedup.sarif
           mv caddy-report-dedup.sarif caddy-report.sarif
       - name: upload artifact
