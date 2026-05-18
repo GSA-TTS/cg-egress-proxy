@@ -35,36 +35,37 @@ jobs:
         run: govulncheck -mode binary proxy/caddy
       - name: run check (sarif)
         run: govulncheck -mode binary -format sarif proxy/caddy > caddy-report.sarif
-      - name: deduplicate sarif
-        run: |
-          jq '
-            (.runs[]?.tool.driver.rules[]?.properties.tags) |= unique
-            | (.runs[]?.results[]? |= (
-              (if .stacks then .stacks |= unique else . end)
-              | (if .codeFlows then .codeFlows[]?.threadFlows |= unique else . end)
-            ))
-          ' caddy-report.sarif > caddy-report-dedup.sarif
-          mv caddy-report-dedup.sarif caddy-report.sarif
-      - name: patch SARIF with locations
+      # govulncheck SARIF output is not GitHub-compliant for two reasons:
+      #   #
+      #   # 1. Missing locations:
+      #   #    - SARIF requires each result to have a `locations` array, but govulncheck (in binary mode)
+      #   #      does not emit this field. This causes SARIF upload to GitHub to fail schema validation.
+      #   #    - The workaround is to patch each result with a `locations` array, copying the first
+      #   #      available `.location` from the first threadFlow if present. This is a common workaround
+      #   #      discussed in Go and GitHub issue trackers, as the govulncheck maintainers have not yet
+      #   #      addressed this limitation (see golang/go#65694 and related issues).
+      #   #
+      #   # 2. Duplicate arrays:
+      #   #    - govulncheck SARIF output may contain duplicate entries in arrays such as
+      #   #      `results[].stacks`, `results[].codeFlows[].threadFlows`, and `tool.driver.rules[].properties.tags`.
+      #   #      The SARIF spec requires all arrays with `uniqueItems: true` to be deduplicated, and GitHub
+      #   #      upload will fail if duplicates are present.
+      #   #    - Deduplication is necessary to ensure SARIF schema compliance and successful upload.
+      #   #
+      # This step patches missing locations and deduplicates all arrays in one pass.
+      - name: patch and deduplicate SARIF for GitHub
         run: |
           jq '
             (.runs[]?.results[]? |= (
               if (.locations|not) and (.codeFlows[0].threadFlows[0].locations[0].location) then
                 .locations = [ .codeFlows[0].threadFlows[0].locations[0].location ]
               else . end
-            ))
-            ' caddy-report.sarif > caddy-report-patched.sarif
-          mv caddy-report-patched.sarif caddy-report.sarif
-      - name: deduplicate sarif (final)
-        run: |
-          jq '
-            (.runs[]?.tool.driver.rules[]?.properties.tags) |= unique
-            | (.runs[]?.results[]? |= (
-              (if .stacks then .stacks |= unique else . end)
+              | (if .stacks then .stacks |= unique else . end)
               | (if .codeFlows then .codeFlows[]?.threadFlows |= unique else . end)
             ))
-          ' caddy-report.sarif > caddy-report-dedup.sarif
-          mv caddy-report-dedup.sarif caddy-report.sarif
+            | (.runs[]?.tool.driver.rules[]?.properties.tags) |= unique
+          ' caddy-report.sarif > caddy-report-fixed.sarif
+          mv caddy-report-fixed.sarif caddy-report.sarif
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
