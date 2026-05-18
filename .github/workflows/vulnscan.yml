@@ -57,8 +57,12 @@ jobs:
         run: |
           jq '
             (.runs[]?.results[]? |= (
-              if (.locations|not) and (.codeFlows[0].threadFlows[0].locations[0].location) then
-                .locations = [ .codeFlows[0].threadFlows[0].locations[0].location ]
+              if (.locations|not) then
+                if (.codeFlows[0]?.threadFlows[0]?.locations[0]?.location) then
+                  .locations = [ .codeFlows[0].threadFlows[0].locations[0].location ]
+                else
+                  .locations = [{"physicalLocation": {"artifactLocation": {"uri": "UNKNOWN"}}}]
+                end
               else . end
               | (if .stacks then .stacks |= unique else . end)
               | (if .codeFlows then .codeFlows[]?.threadFlows |= unique else . end)
@@ -72,7 +76,6 @@ jobs:
           name: govulncheck-sarif
           path: caddy-report.sarif
       - name: upload results
-        continue-on-error: true
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: caddy-report.sarif
