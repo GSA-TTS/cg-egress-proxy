@@ -45,6 +45,16 @@ jobs:
             ))
           ' caddy-report.sarif > caddy-report-dedup.sarif
           mv caddy-report-dedup.sarif caddy-report.sarif
+      - name: patch SARIF with locations
+        run: |
+          jq '
+            (.runs[]?.results[]? |= (
+              if (.locations|not) and (.codeFlows[0].threadFlows[0].locations[0]) then
+                .locations = [ .codeFlows[0].threadFlows[0].locations[0] ]
+              else . end
+            ))
+            ' caddy-report.sarif > caddy-report-patched.sarif
+          mv caddy-report-patched.sarif caddy-report.sarif
       - name: upload artifact
         uses: actions/upload-artifact@v4
         with:
