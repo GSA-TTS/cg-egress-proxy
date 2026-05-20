@@ -19,5 +19,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: terraform test
         uses: dflook/terraform-test@v2
