@@ -21,12 +21,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Regenerate binary
         run: make
       - name: Did anything change?
         id: vars
         run: |
-          branchname="binary-update/${{ github.ref_name }}"
+          branchname="binary-update/${GITHUB_REF_NAME}"
           echo "branchname=${branchname}" >> $GITHUB_OUTPUT
           binaryupdated=$(git status --porcelain | cut -d ' ' -f 2 | wc -l)
           echo "binaryupdated=${binaryupdated}" >> $GITHUB_OUTPUT
