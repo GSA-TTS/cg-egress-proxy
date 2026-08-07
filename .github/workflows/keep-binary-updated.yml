@@ -20,7 +20,7 @@ jobs:
   keep-binary-up-to-date:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - name: Regenerate binary
@@ -34,7 +34,7 @@ jobs:
           echo "binaryupdated=${binaryupdated}" >> $GITHUB_OUTPUT
       - name: Create PR with changes
         if: steps.vars.outputs.binaryupdated != 0
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           commit-message: Update binary for ${{ github.ref_name }}
           title: Update caddy binary for ${{ github.ref_name }}

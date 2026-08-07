@@ -23,11 +23,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
       - name: setup go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
           go-version: 'stable'
       - name: install govulncheck
@@ -74,7 +74,7 @@ jobs:
           ' caddy-report.sarif > caddy-report-fixed.sarif
           mv caddy-report-fixed.sarif caddy-report.sarif
       - name: upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: govulncheck-sarif
           path: caddy-report.sarif
