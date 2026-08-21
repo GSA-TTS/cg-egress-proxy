@@ -3,6 +3,10 @@
 #   - Document how to tunnel sftp://
 #   - Document how to test with cf ssh port-forwarding to your browser!
 {
+	order forward_proxy first
+}
+
+{
 	debug
 	log {
 		format console
