@@ -136,7 +136,7 @@ for app in $applist ; do
     # Grab the hostnames for any attached aws-elasticsearch (OpenSearch) services to include in the allow list
     aws_elasticsearch_hosts=""
     aws_elasticsearch=$(echo "$VCAP_SERVICES" | jq -r '.["aws-elasticsearch"]')
-    n=$(echo "$aws_elasticsearch | jq -r 'length'")
+    n=$(echo "$aws_elasticsearch" | jq -r 'length')
     i=0
     while [ $i -lt "$n" ]
     do
@@ -160,6 +160,7 @@ for app in $applist ; do
     # Auto-allow bound buckets
     proxydeny=$(  cat "$app".deny.acl )
     proxyallow=$( cat "$app".allow.acl <(echo "$buckethosts") )
+    proxyallow=$( cat "$app".allow.acl <(echo "$aws_elasticsarch_hosts") )
 
     # Normalize into a YAML multiline block form
     proxydeny=$(  echo "$proxydeny"  | sed 's/^[^[:space:]]/ &/' | sed 's/\ /\n  /g' | sed '/^\s*$/d' )
@@ -173,6 +174,7 @@ $proxydeny
 proxyallow: |
 $proxyallow
 "
+
 
     # We're ready, let's do this!
     $output cf target -o "$egressorg" -s "$egressspace"
