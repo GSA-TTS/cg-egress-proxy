@@ -38,7 +38,9 @@ Requirements:
 
 NOTES:
 - Files <app>.<allow|deny>.acl will be created if they don't exist
-- Any S3 buckets bound to an app will automatically be allowed for that app
+- Hosts for certain services bound to an app will automatically be allowed for that app:
+  - S3 services -- both FIPS and non-FIPS hostnames
+  - OpenSearch (aws-elasticsearch) services
 - Your apps will be restarted in a rolling fashion to pick up variable changes
 - Post-restart, just use the <envvariablename> variable when making egress connections!
 - You may want to set the <envvariablename> to a different value so that it is not set
@@ -112,9 +114,10 @@ fi
 
 for app in $applist ; do
 
+    VCAP_SERVICES=$(cf env "$app" | sed -n -e "/VCAP_SERVICES/,\$p" | sed -e "/VCAP_APPLICATION:/,\$d" | sed 's/VCAP_SERVICES: //g' | jq -r )
+
     # Grab the hostnames for any attached S3 buckets to include in the allow list
     buckethosts=""
-    VCAP_SERVICES=$(cf env "$app" | sed -n -e "/VCAP_SERVICES/,\$p" | sed -e "/VCAP_APPLICATION:/,\$d" | sed 's/VCAP_SERVICES: //g' | jq -r )
     n=$(echo "$VCAP_SERVICES" | jq -r '.s3 | length')
     i=0
     while [ $i -lt "$n" ]
@@ -127,6 +130,19 @@ for app in $applist ; do
 
         # Add both the FIPS and non-FIPS hostnames, and the alt format of BUCKET.s3.REGION... that boto3 uses
         buckethosts="$buckethosts ${BUCKET}.${AWS_ENDPOINT} ${BUCKET}.${AWS_ALT_ENDPOINT} ${BUCKET}.${AWS_FIPS_ENDPOINT}"
+        ((i+=1))
+    done
+
+    # Grab the hostnames for any attached aws-elasticsearch (OpenSearch) services to include in the allow list
+    aws_elasticsearch_hosts=""
+    aws_elasticsearch=$(echo "$VCAP_SERVICES" | jq -r '.["aws-elasticsearch"]')
+    n=$(echo "$aws_elasticsearch | jq -r 'length'")
+    i=0
+    while [ $i -lt "$n" ]
+    do
+        # Add attached services to the allow list
+        AWS_ES_HOST=$(echo "$aws_elasticsearch" | jq -r ".[$1].credentials.host")
+        aws_elasticsearch_hosts="$aws_elasticsearch_hosts $AWS_ES_HOST"
         ((i+=1))
     done
 
