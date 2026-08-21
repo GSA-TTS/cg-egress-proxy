@@ -141,7 +141,7 @@ for app in $applist ; do
     while [ $i -lt "$n" ]
     do
         # Add attached services to the allow list
-        AWS_ES_HOST=$(echo "$aws_elasticsearch" | jq -r ".[$1].credentials.host")
+        AWS_ES_HOST=$(echo "$aws_elasticsearch" | jq -r ".[$i].credentials.host")
         aws_elasticsearch_hosts="$aws_elasticsearch_hosts $AWS_ES_HOST"
         ((i+=1))
     done
@@ -157,10 +157,10 @@ for app in $applist ; do
     username="$(randpw)"
     password="$(randpw)"
 
-    # Auto-allow bound buckets
+    # Auto-allow bound services
+    bound_services_hosts="$buckethosts $aws_elasticsearch_hosts"
     proxydeny=$(  cat "$app".deny.acl )
-    proxyallow=$( cat "$app".allow.acl <(echo "$buckethosts") )
-    proxyallow=$( cat "$app".allow.acl <(echo "$aws_elasticsarch_hosts") )
+    proxyallow=$( cat "$app".allow.acl <(echo "$bound_services_hosts") )
 
     # Normalize into a YAML multiline block form
     proxydeny=$(  echo "$proxydeny"  | sed 's/^[^[:space:]]/ &/' | sed 's/\ /\n  /g' | sed '/^\s*$/d' )
