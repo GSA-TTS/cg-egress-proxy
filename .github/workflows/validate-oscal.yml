@@ -22,7 +22,7 @@ jobs:
           persist-credentials: false
 
       - name: Validate Component
-        uses: ./.github/actions/trestle-cmd
+        uses: $/.github/actions/trestle-cmd
         with:
           cmd: trestle validate -f component-definitions/cg-egress-proxy/component-definition.json
 
@@ -35,7 +35,7 @@ jobs:
           persist-credentials: false
 
       - name: Check assembly
-        uses: ./.github/actions/trestle-cmd
+        uses: $/.github/actions/trestle-cmd
         with:
           cmd: bin/assemble-cgep-json
 
