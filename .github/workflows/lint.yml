@@ -19,7 +19,7 @@ jobs:
           persist-credentials: false
 
       - name: terraform validate
-        uses: dflook/terraform-validate@v2
+        uses: dflook/terraform-validate@36ef08d500fe2cd9b742b10176d2683707c7074e # v3
 
   fmt-check:
     runs-on: ubuntu-latest
@@ -31,4 +31,4 @@ jobs:
           persist-credentials: false
 
       - name: terraform fmt
-        uses: dflook/terraform-fmt-check@v2
+        uses: dflook/terraform-fmt-check@5702d43749973bd5b54e2380f090c1ad8054ecd4 # v3
