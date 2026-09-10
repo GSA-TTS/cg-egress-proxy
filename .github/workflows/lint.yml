@@ -14,21 +14,21 @@ jobs:
     name: Validate terraform configuration
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: terraform validate
-        uses: dflook/terraform-validate@v2
+        uses: dflook/terraform-validate@4cef5d8a4b92bcd88486e41e22a42942a382c9d6 # v2.2.3
 
   fmt-check:
     runs-on: ubuntu-latest
     name: Check formatting of terraform files
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: terraform fmt
-        uses: dflook/terraform-fmt-check@v2
+        uses: dflook/terraform-fmt-check@59168426e242f665bf7b70644d706224e665056a # v2.2.3
