@@ -18,8 +18,8 @@ jobs:
         apt-get install -y zip
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: terraform test
-        uses: dflook/terraform-test@v2
+        uses: dflook/terraform-test@919e4d8e694dbea2a98f59453d8f4f10c57ea0d3 # v2.2.3
