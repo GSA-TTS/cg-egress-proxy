@@ -1,46 +1,98 @@
 ---
-name: Keep binary updated
-# Periodically rebuild from the upstream "latest" releases, then raise a new
-# pull-request if the binary file changed.
+name: Check binary is current
+# Verify that the committed proxy/caddy binary matches what a fresh build
+# produces. This runs as a pull-request check rather than raising an automated
+# pull request of its own, because proxy/caddy (~46 MiB) exceeds the 40 MiB
+# limit the GitHub API imposes when creating git blobs, which is the mechanism
+# any bot-signed commit must use. See issue #114.
 #
-# Cribs heavily from this example:
-# https://github.com/peter-evans/create-pull-request/blob/main/docs/examples.md#use-case-create-a-pull-request-to-modifyfix-pull-requests
+# The docker build is pinned to base image digests, so a fresh build is
+# byte-reproducible: drift can only appear when one of the inputs below
+# changes without the binary being rebuilt and committed alongside it.
+#
+# When this check fails, rebuild and commit the binary yourself -- see
+# "For local development" in README.md.
 
 on:
   workflow_dispatch:
-  schedule:
-    # Runs every night around 4:20am EST/1:20am PST
-    - cron: "20 8 * * *"
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+    paths:
+      - Dockerfile
+      - compose.yaml
+      - Makefile
 
 permissions:
-  contents: write
+  contents: read
   pull-requests: write
 
 jobs:
-  keep-binary-up-to-date:
+  check-binary-current:
+    name: Check committed caddy binary matches a fresh build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Regenerate binary
+
+      - name: Rebuild binary
         run: make
-      - name: Did anything change?
-        id: vars
+
+      - name: Compare against committed binary
+        id: drift
         run: |
-          branchname="binary-update/${GITHUB_REF_NAME}"
-          echo "branchname=${branchname}" >> $GITHUB_OUTPUT
-          binaryupdated=$(git status --porcelain | cut -d ' ' -f 2 | wc -l)
-          echo "binaryupdated=${binaryupdated}" >> $GITHUB_OUTPUT
-      - name: Create PR with changes
-        if: steps.vars.outputs.binaryupdated != 0
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+          if git diff --quiet -- proxy/caddy; then
+            echo "proxy/caddy is current: a fresh build is byte-identical."
+            exit 0
+          fi
+          # Read the version statically rather than executing the binary.
+          caddy_version=$(go version -m proxy/caddy 2>/dev/null \
+            | awk '$1=="dep" && $2=="github.com/caddyserver/caddy/v2" {print $3; exit}')
+          {
+            echo "sha256=$(sha256sum proxy/caddy | cut -d ' ' -f 1)"
+            echo "caddy_version=${caddy_version:-unknown}"
+          } >> "$GITHUB_OUTPUT"
+          echo "::error::proxy/caddy does not match a fresh build. Rebuild it with 'make' and commit the result."
+          exit 1
+
+      - name: Comment on pull request
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          EXPECTED_SHA256: ${{ steps.drift.outputs.sha256 }}
+          CADDY_VERSION: ${{ steps.drift.outputs.caddy_version }}
         with:
-          commit-message: Update binary for ${{ github.ref_name }}
-          title: Update caddy binary for ${{ github.ref_name }}
-          body: This is an auto-generated PR to add an updated binary on ${{ github.ref_name }}.
-          labels: binary-update, automated-pr
-          branch: ${{ steps.vars.outputs.branchname }}
-          base: ${{ github.ref_name }}
-          draft: always-true
-          sign-commits: true
+          script: |
+            const output = `The committed \`proxy/caddy\` does not match what this branch builds.
+
+            Rebuild and commit it:
+
+            \`\`\`bash
+            make
+            sha256sum proxy/caddy
+            \`\`\`
+
+            Expected after rebuilding:
+
+            | | |
+            |---|---|
+            | sha256 | \`${process.env.EXPECTED_SHA256}\` |
+            | caddy version | \`${process.env.CADDY_VERSION}\` |
+
+            If your local sha256 differs from the value above, the build is not
+            reproducing and something other than the pinned inputs has changed --
+            investigate before committing.
+
+            The binary must be committed by a human because \`main\` requires signed
+            commits, and bot-signed commits cannot carry a file this large (see #114).`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });

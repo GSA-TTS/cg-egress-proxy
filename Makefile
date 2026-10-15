@@ -4,7 +4,7 @@ GOARCH?=amd64
 caddy-v2-with-forwardproxy: Dockerfile proxy/Caddyfile
 	docker compose build --build-arg GOOS=$(GOOS) --build-arg GOARCH=$(GOARCH)
 	docker compose up -d
-	- docker compose cp caddy:/usr/bin/caddy proxy/caddy
+	docker compose cp caddy:/usr/bin/caddy proxy/caddy
 	docker compose down
 
 validate:

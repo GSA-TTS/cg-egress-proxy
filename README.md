@@ -265,6 +265,31 @@ A custom Caddy binary with a forward-proxy plugin is included in the `proxy/` di
 $ make
 ```
 
+### Updating the committed binary
+
+The `Dockerfile` pins its base images to specific digests, so the build is
+reproducible: rebuilding without changing an input produces a byte-identical
+binary. The "Check binary is current" workflow relies on this. It runs on pull
+requests that touch `Dockerfile`, `compose.yaml`, or `Makefile`, and fails if
+the committed `proxy/caddy` doesn't match a fresh build.
+
+When that check fails — most often on a dependency-update PR that bumps a base
+image digest — rebuild and commit the binary:
+
+```bash
+$ make
+$ sha256sum proxy/caddy
+```
+
+Compare that sha256 against the value reported in the failed check's comment.
+They should match; if they don't, the build isn't reproducing and something
+beyond the pinned inputs has changed, so investigate before committing.
+
+The binary is committed by a human rather than by automation. `main` requires
+signed commits, and bot-signed commits route through the GitHub API, which
+caps git blobs at 40 MiB — smaller than the binary. See
+[#114](https://github.com/GSA-TTS/cg-egress-proxy/issues/114).
+
 
 ## Local testing
 
