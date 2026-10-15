@@ -52,10 +52,15 @@ jobs:
           # Read the version statically rather than executing the binary.
           caddy_version=$(go version -m proxy/caddy 2>/dev/null \
             | awk '$1=="dep" && $2=="github.com/caddyserver/caddy/v2" {print $3; exit}')
+          sha256=$(sha256sum proxy/caddy | cut -d ' ' -f 1)
           {
-            echo "sha256=$(sha256sum proxy/caddy | cut -d ' ' -f 1)"
+            echo "sha256=${sha256}"
             echo "caddy_version=${caddy_version:-unknown}"
           } >> "$GITHUB_OUTPUT"
+          # Echo to the log as well, so the values are visible on
+          # workflow_dispatch runs where no pull request comment is posted.
+          echo "Expected sha256 after rebuilding: ${sha256}"
+          echo "Caddy version in fresh build:      ${caddy_version:-unknown}"
           echo "::error::proxy/caddy does not match a fresh build. Rebuild it with 'make' and commit the result."
           exit 1
 
