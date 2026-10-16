@@ -22,4 +22,4 @@ jobs:
         with:
           persist-credentials: false
       - name: terraform test
-        uses: dflook/terraform-test@919e4d8e694dbea2a98f59453d8f4f10c57ea0d3 # v2.2.3
+        uses: dflook/terraform-test@e239c64d00d5de45defc98d93ef5318adbc47f30 # v3.1.0
