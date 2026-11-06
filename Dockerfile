@@ -1,14 +1,14 @@
 # See "Adding custom Caddy modules" here:
 # https://hub.docker.com/_/caddy
 
-FROM caddy:2.11-builder@sha256:d842facfd63b960922e57444ff76fd8f0793a66dfdcf481af8026e1f4e6a39b4 AS builder
+FROM caddy:2.11-builder@sha256:ccd8bdb5d7b25c78962bac46b7daaabfb0a354d0decf7d752e1b69caf46d9b85 AS builder
 
 ARG GOARCH=amd64
 ARG GOOS=linux
 RUN xcaddy build \
     --with github.com/caddyserver/forwardproxy
 
-FROM caddy:2.11-alpine@sha256:d8542f48d34a9cf4e4c11a478865229840e87e4c96ea3f439101f31a5d35f75f
+FROM caddy:2.11-alpine@sha256:78bd35025c7ba85961dd149ae670315129954e77abe2383ac47c89106b35ade9
 
 RUN apk add --no-cache jq curl
 
